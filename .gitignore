@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Node & frontend build artifacts
+node_modules/
+web/node_modules/
+web/dist/
+web/.vite/
+web/.env*
