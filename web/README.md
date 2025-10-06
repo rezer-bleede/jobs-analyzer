@@ -17,9 +17,13 @@ across the Middle East by reading a JSON feed stored in Cloudflare R2.
 ```bash
 cd web
 npm install
+# Optional: only needed when you have a CORS-enabled remote JSON feed
 export VITE_JOBS_DATA_URL="https://6d9a56e137a3328cc52e48656dd30d91.r2.cloudflarestorage.com/me-data-jobs"
 npm run dev
 ```
+
+If `VITE_JOBS_DATA_URL` is omitted, the app automatically falls back to the local [`public/jobs.json`](public/jobs.json)
+fixture, keeping development friction-free.
 
 The development server runs on <http://localhost:5173>. Update the environment variable to point at your own R2 object as
 needed.
@@ -38,6 +42,10 @@ needed.
 | Variable             | Description                                                                                 |
 | -------------------- | ------------------------------------------------------------------------------------------- |
 | `VITE_JOBS_DATA_URL` | Absolute URL of the JSON payload in Cloudflare R2 that contains the job listings to render. |
+
+> **CORS reminder:** Cloudflare R2 must return an `Access-Control-Allow-Origin` header that covers your deployment
+> (e.g. `*` or `https://<project>.pages.dev`). Without it the browser will surface a CORS error and the app will display a
+> guidance message while using `/jobs.json` as a safe fallback.
 
 When deploying on Cloudflare Pages, configure the variable in **Settings → Environment variables**. The URL provided by
 the user for this exercise is `https://6d9a56e137a3328cc52e48656dd30d91.r2.cloudflarestorage.com/me-data-jobs`.

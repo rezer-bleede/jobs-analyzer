@@ -51,12 +51,13 @@ describe('App integration', () => {
     expect(screen.getAllByText('Doha, Qatar')[0]).toBeInTheDocument()
   })
 
-  it('displays an error message when fetching jobs fails', async () => {
+  it('displays an informative error message when fetching jobs fails', async () => {
     fetchMock.mockRejectedValue(new Error('Network unavailable'))
 
     render(<App />)
 
     await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Unable to load jobs data')
       expect(screen.getByRole('alert')).toHaveTextContent('Network unavailable')
     })
   })

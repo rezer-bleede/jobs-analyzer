@@ -17,12 +17,15 @@ object stored in Cloudflare R2.
    npm install
    ```
 
-2. Provide the Cloudflare R2 JSON endpoint via an environment variable before starting the development server or
-   running the production build:
+2. (Optional) Provide the Cloudflare R2 JSON endpoint via an environment variable before starting the development server
+   or running the production build:
 
    ```bash
    export VITE_JOBS_DATA_URL="https://<account-id>.r2.cloudflarestorage.com/me-data-jobs"
    ```
+
+   If the variable is omitted, the app automatically falls back to the bundled [`web/public/jobs.json`](web/public/jobs.json)
+   file which is CORS-free and safe for local development.
 
 3. Launch the local development server:
 
@@ -48,7 +51,11 @@ object stored in Cloudflare R2.
 2. Set the **Build command** to `npm run build` and the **Build output directory** to `dist`.
 3. Define the `VITE_JOBS_DATA_URL` environment variable under **Settings → Environment variables** and point it to the
    Cloudflare R2 bucket URL that serves your JSON feed (`https://6d9a56e137a3328cc52e48656dd30d91.r2.cloudflarestorage.com/me-data-jobs`).
-4. Trigger a deployment. The app will automatically fetch and render the latest data engineering roles.
+   Ensure your R2 bucket sends the `Access-Control-Allow-Origin` header (set it to `*` or your Pages domain); otherwise the
+   browser will block the request due to CORS and the site will fall back to `/jobs.json`.
+4. Trigger a deployment. The app will automatically fetch and render the latest data engineering roles. When CORS is not
+   available on the remote bucket the site remains functional using the bundled fallback dataset, and users see a helpful
+   error message explaining the misconfiguration.
 
 ## License
 
