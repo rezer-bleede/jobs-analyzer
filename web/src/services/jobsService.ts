@@ -1,4 +1,4 @@
-import { Job } from '../types/job'
+import type { Job } from '../types/job'
 import { parseSkillList } from '../utils/skills'
 
 type RawJob = Record<string, unknown>

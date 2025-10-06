@@ -5,7 +5,7 @@ import { JobCard } from './components/JobCard'
 import { SkillHighlights } from './components/SkillHighlights'
 import { SummaryMetrics } from './components/SummaryMetrics'
 import { fetchJobs } from './services/jobsService'
-import { Job, JobFilters } from './types/job'
+import type { Job, JobFilters } from './types/job'
 import {
   applyFilters,
   defaultFilters,
