@@ -10,6 +10,7 @@ across the Middle East by reading a JSON feed stored in Cloudflare R2.
 - 📊 **Market signals** – Summaries of active companies, cross-country coverage, and in-demand technologies.
 - ☁️ **Cloudflare ready** – Designed for static deployment with data delivered from R2 via `VITE_JOBS_DATA_URL`.
 - ✅ **Quality assured** – Includes unit and integration tests powered by Vitest and Testing Library.
+- 🛡️ **Resilient data ingest** – Normalises Cloudflare R2 payloads and defends against network failures with tested fallbacks.
 
 ## Getting started locally
 
@@ -52,6 +53,13 @@ Run the full suite before every commit/deployment:
 ```bash
 npm test
 ```
+
+## Development notes
+
+- The project opts into TypeScript's `verbatimModuleSyntax`, so type-only imports **must** use `import type { ... }` to
+  keep the build green.
+- Vitest configuration lives in `vite.config.ts` and is typed via Vitest's `InlineConfig`, keeping Vite and Vitest settings
+  in one place.
 
 ## Deployment on Cloudflare Pages
 

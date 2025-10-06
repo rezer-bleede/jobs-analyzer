@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
+import type { UserConfig } from 'vite'
+import type { InlineConfig } from 'vitest'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-export default defineConfig({
+const config: UserConfig & { test: InlineConfig } = {
   plugins: [react()],
   test: {
     environment: 'jsdom',
@@ -10,4 +12,6 @@ export default defineConfig({
     globals: true,
     css: true,
   },
-})
+}
+
+export default defineConfig(config)

@@ -1,4 +1,4 @@
-import { SkillFrequency } from '../utils/skills'
+import type { SkillFrequency } from '../utils/skills'
 
 interface SkillHighlightsProps {
   skills: SkillFrequency[]

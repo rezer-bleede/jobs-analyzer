@@ -1,4 +1,4 @@
-import { Job } from '../types/job'
+import type { Job } from '../types/job'
 
 const formatDate = (value?: string | null): string => {
   if (!value) {

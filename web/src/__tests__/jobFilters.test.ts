@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { Job, JobFilters } from '../types/job'
+import type { Job, JobFilters } from '../types/job'
 import { applyFilters, defaultFilters } from '../utils/jobFilters'
 
 const createJob = (overrides: Partial<Job> = {}): Job => ({

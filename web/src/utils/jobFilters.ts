@@ -1,4 +1,4 @@
-import { Job, JobFilters } from '../types/job'
+import type { Job, JobFilters } from '../types/job'
 
 export const defaultFilters: JobFilters = {
   searchTerm: '',

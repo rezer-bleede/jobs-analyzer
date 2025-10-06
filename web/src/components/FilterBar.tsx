@@ -1,5 +1,5 @@
-import { ChangeEvent } from 'react'
-import { JobFilters } from '../types/job'
+import type { ChangeEvent } from 'react'
+import type { JobFilters } from '../types/job'
 
 interface FilterBarProps {
   filters: JobFilters
