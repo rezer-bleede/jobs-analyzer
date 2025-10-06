@@ -76,22 +76,75 @@ describe('fetchJobs', () => {
     })
   })
 
-  it('throws a helpful error when fetch returns a non-ok response', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 500,
+  it('falls back to the default jobs file when the primary URL fails (e.g. due to CORS)', async () => {
+    const fallbackPayload = [
+      {
+        job_hash: 'job-2',
+        title: 'Platform Data Engineer',
+        company: 'Camel Cloud',
+        location: 'Jeddah, Saudi Arabia',
+      },
+    ]
+
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => fallbackPayload,
+      })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await fetchJobs('https://example.com/jobs.json')
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.com/jobs.json')
+    expect(fetchMock).toHaveBeenNthCalledWith(2, '/jobs.json')
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      id: 'job-2',
+      title: 'Platform Data Engineer',
+      company: 'Camel Cloud',
     })
+  })
+
+  it('throws a detailed error when both primary and fallback sources fail', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError('Failed to fetch'))
+      .mockRejectedValueOnce(new Error('Not found'))
 
     vi.stubGlobal('fetch', fetchMock)
 
     await expect(fetchJobs('https://example.com/jobs.json')).rejects.toThrow(
-      'Unable to fetch jobs data (status 500)',
+      /Unable to load jobs data\. Primary source https:\/\/example\.com\/jobs\.json failed: Failed to fetch \(the server at https:\/\/example\.com\/jobs\.json may be blocking cross-origin requests\) Fallback source \/jobs\.json failed: Not found/,
     )
   })
 
-  it('throws when the jobs URL is missing', async () => {
-    await expect(fetchJobs('')).rejects.toThrow(
-      'Jobs data URL is not configured. Set VITE_JOBS_DATA_URL in your environment.',
-    )
+  it('uses the fallback when the primary URL is missing', async () => {
+    const fallbackPayload = [
+      {
+        job_hash: 'job-3',
+        title: 'Data Reliability Engineer',
+        company: 'Oasis Analytics',
+        location: 'Manama, Bahrain',
+      },
+    ]
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => fallbackPayload,
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await fetchJobs('', '/jobs.json')
+
+    expect(fetchMock).toHaveBeenCalledWith('/jobs.json')
+    expect(result[0]).toMatchObject({
+      title: 'Data Reliability Engineer',
+      company: 'Oasis Analytics',
+    })
   })
 })

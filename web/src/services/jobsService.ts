@@ -121,16 +121,63 @@ export const normaliseJobs = (data: unknown): Job[] => {
   throw new Error('Unsupported jobs payload received from the API')
 }
 
-export const fetchJobs = async (dataUrl = import.meta.env.VITE_JOBS_DATA_URL): Promise<Job[]> => {
-  if (!dataUrl) {
-    throw new Error('Jobs data URL is not configured. Set VITE_JOBS_DATA_URL in your environment.')
+const describeError = (error: unknown, url: string): string => {
+  if (error instanceof Error) {
+    if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+      return `${error.message} (the server at ${url} may be blocking cross-origin requests)`
+    }
+    return error.message
+  }
+  return String(error)
+}
+
+const fetchFromUrl = async (url: string): Promise<Job[]> => {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`)
+    }
+
+    const payload = await response.json()
+    return normaliseJobs(payload)
+  } catch (error) {
+    throw error instanceof Error ? error : new Error(String(error))
+  }
+}
+
+export const fetchJobs = async (
+  dataUrl = import.meta.env.VITE_JOBS_DATA_URL,
+  fallbackUrl = '/jobs.json',
+): Promise<Job[]> => {
+  const errors: string[] = []
+  const trimmedPrimaryUrl = dataUrl?.trim()
+
+  if (trimmedPrimaryUrl) {
+    try {
+      return await fetchFromUrl(trimmedPrimaryUrl)
+    } catch (error) {
+      errors.push(`Primary source ${trimmedPrimaryUrl} failed: ${describeError(error, trimmedPrimaryUrl)}`)
+    }
+  } else {
+    errors.push('Primary jobs data URL is not configured via VITE_JOBS_DATA_URL.')
   }
 
-  const response = await fetch(dataUrl)
-  if (!response.ok) {
-    throw new Error(`Unable to fetch jobs data (status ${response.status})`)
+  const trimmedFallbackUrl = fallbackUrl?.trim()
+  if (trimmedFallbackUrl) {
+    try {
+      return await fetchFromUrl(trimmedFallbackUrl)
+    } catch (error) {
+      errors.push(`Fallback source ${trimmedFallbackUrl} failed: ${describeError(error, trimmedFallbackUrl)}`)
+    }
+  } else {
+    errors.push('Fallback jobs data URL is empty.')
   }
 
-  const payload = await response.json()
-  return normaliseJobs(payload)
+  throw new Error(
+    [
+      'Unable to load jobs data.',
+      ...errors,
+      'If you are fetching from Cloudflare R2 or another external store, enable CORS for your bucket or host the JSON file at web/public/jobs.json and ensure the path is reachable from your deployment.',
+    ].join(' '),
+  )
 }

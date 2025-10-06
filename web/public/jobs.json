@@ -1,0 +1,22 @@
+[
+  {
+    "job_hash": "sample-1",
+    "title": "Senior Data Engineer",
+    "company": "Gulf Data Labs",
+    "location": "Riyadh, Saudi Arabia",
+    "job_type": "Full-time",
+    "date_posted": "2024-12-15",
+    "is_remote": false,
+    "desired_tech_skills_inferred": "Python, dbt, Snowflake"
+  },
+  {
+    "job_hash": "sample-2",
+    "title": "Analytics Engineer",
+    "company": "Desert Insights",
+    "location": "Dubai, United Arab Emirates",
+    "job_type": "Hybrid",
+    "date_posted": "2024-12-10",
+    "is_remote": true,
+    "desired_tech_skills_inferred": "SQL, Looker, Airflow"
+  }
+]
