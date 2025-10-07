@@ -2,8 +2,14 @@
 
 This repository hosts a modern single-page application that spotlights data engineering opportunities across the Middle
 East. The site is designed to run as a static Cloudflare Pages deployment while sourcing live job listings from a JSON
-object stored in Cloudflare R2. The landing experience is now streamlined for actionable content and adapts fluidly to
-mobile screens so job seekers can triage roles on the go.
+object stored in Cloudflare R2. The landing experience is streamlined for actionable content, introduces an analytics
+dashboard with hiring trends, and adapts fluidly to mobile screens so job seekers can triage roles on the go.
+
+## Highlights
+
+- 🔍 Multi-select keyword search with autocomplete suggestions spanning job titles, companies, and in-demand skills.
+- 🗓️ Posting date filters (24 hours, 3 days, 1 week, 2 weeks) to surface the freshest opportunities instantly.
+- 📊 Dedicated analytics page summarising market metrics, recent hiring companies, and skills momentum.
 
 ## Project structure
 

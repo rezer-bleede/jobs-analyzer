@@ -34,6 +34,9 @@ const mockJobsPayload = [
 
 describe('App', () => {
   beforeEach(() => {
+    const now = new Date()
+    mockJobsPayload[0].date_posted = now.toISOString()
+    mockJobsPayload[1].date_posted = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
     vi.stubEnv('VITE_JOBS_DATA_URL', 'https://example.com/jobs.json')
     vi.stubGlobal('fetch', vi.fn(() =>
       Promise.resolve({
@@ -57,9 +60,11 @@ describe('App', () => {
       }),
     ).toHaveAttribute('href', '#job-results')
 
-    expect(
-      await screen.findByText(/live metrics summarise total, remote, and company coverage/i),
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /view market analytics/i })).toHaveAttribute(
+      'href',
+      '/analytics',
+    )
+    expect(await screen.findByText(/multi-select search and posting date filters/i)).toBeInTheDocument()
   })
 
   it('renders job cards after fetching data', async () => {
@@ -74,20 +79,19 @@ describe('App', () => {
     render(<App />)
     await waitFor(() => expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument())
 
-    const searchInput = screen.getByPlaceholderText(/search by title/i)
-    await userEvent.clear(searchInput)
-    await userEvent.type(searchInput, 'platform')
+    const searchInput = screen.getByLabelText(/search roles or companies/i)
+    await userEvent.type(searchInput, 'platform{enter}')
 
     expect(await screen.findByText(/showing 1 role/i)).toBeInTheDocument()
     expect(screen.queryByText('Senior Data Engineer')).not.toBeInTheDocument()
   })
 
-  it('supports remote-only filtering', async () => {
+  it('supports filtering by posting date', async () => {
     render(<App />)
     await waitFor(() => expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument())
 
-    const remoteToggle = screen.getByLabelText(/remote only/i)
-    await userEvent.click(remoteToggle)
+    const dateSelect = screen.getByLabelText(/date posted/i)
+    await userEvent.selectOptions(dateSelect, 'Past 3 days')
 
     expect(await screen.findByText(/showing 1 role/i)).toBeInTheDocument()
     expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument()

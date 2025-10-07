@@ -1,10 +1,12 @@
 import type { ChangeEvent } from 'react'
 import type { JobFilters } from '../types/job'
+import { SearchMultiSelect } from './SearchMultiSelect'
 
 interface FilterBarProps {
   filters: JobFilters
   locationOptions: string[]
-  jobTypeOptions: string[]
+  searchOptions: string[]
+  datePostedOptions: readonly string[]
   isLoading: boolean
   onChange: (updates: Partial<JobFilters>) => void
   onReset: () => void
@@ -21,30 +23,22 @@ const handleTextChange = (
 export const FilterBar = ({
   filters,
   locationOptions,
-  jobTypeOptions,
+  searchOptions,
+  datePostedOptions,
   isLoading,
   onChange,
   onReset,
 }: FilterBarProps) => {
-  const onRemoteToggle = (event: ChangeEvent<HTMLInputElement>) => {
-    onChange({ remoteOnly: event.target.checked })
-  }
-
   return (
     <section className="filter-bar bg-white rounded-4 shadow-sm p-4 mb-4">
       <div className="d-flex flex-column flex-lg-row gap-3 align-items-lg-end">
         <div className="flex-grow-1 w-100">
-          <label htmlFor="searchTerm" className="form-label text-uppercase fw-semibold small text-secondary">
-            Search roles or companies
-          </label>
-          <input
-            id="searchTerm"
-            name="searchTerm"
-            type="search"
-            className="form-control form-control-lg"
+          <SearchMultiSelect
+            label="Search roles or companies"
             placeholder="Search by title, company, technology, or keywords"
-            value={filters.searchTerm}
-            onChange={(event) => handleTextChange(event, onChange)}
+            selected={filters.searchTerms}
+            options={searchOptions}
+            onChange={(next) => onChange({ searchTerms: next })}
             disabled={isLoading}
           />
         </div>
@@ -68,43 +62,23 @@ export const FilterBar = ({
           </select>
         </div>
         <div className="flex-grow-1 w-100">
-          <label htmlFor="jobType" className="form-label text-uppercase fw-semibold small text-secondary">
-            Job type
+          <label htmlFor="datePosted" className="form-label text-uppercase fw-semibold small text-secondary">
+            Date posted
           </label>
           <select
-            id="jobType"
-            name="jobType"
+            id="datePosted"
+            name="datePosted"
             className="form-select form-select-lg"
-            value={filters.jobType}
+            value={filters.datePosted}
             onChange={(event) => handleTextChange(event, onChange)}
             disabled={isLoading}
           >
-            {jobTypeOptions.map((option) => (
+            {datePostedOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
           </select>
-        </div>
-        <div className="flex-grow-1 w-100">
-          <label className="form-label text-uppercase fw-semibold small text-secondary">
-            Remote friendly
-          </label>
-          <div className="form-check form-switch ps-0 d-flex align-items-center gap-2">
-            <input
-              id="remoteOnly"
-              name="remoteOnly"
-              className="form-check-input ms-0"
-              type="checkbox"
-              role="switch"
-              checked={filters.remoteOnly}
-              onChange={onRemoteToggle}
-              disabled={isLoading}
-            />
-            <label htmlFor="remoteOnly" className="form-check-label fw-semibold">
-              Remote only
-            </label>
-          </div>
         </div>
         <div className="flex-shrink-0">
           <button

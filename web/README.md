@@ -7,8 +7,8 @@ across the Middle East by reading a JSON feed stored in Cloudflare R2.
 
 - 🎯 **Focused experience** – Highlights data engineering roles with company, location, and posting insights.
 - 📱 **Mobile-first design** – Responsive layout keeps the filters and results easy to read on phones and tablets.
-- 🔍 **Powerful filters** – Search by keyword, limit by country, job type, or remote-friendly opportunities.
-- 📊 **Market signals** – Summaries of active companies, cross-country coverage, and in-demand technologies.
+- 🔍 **Powerful filters** – Multi-select keyword search with autocomplete, country filtering, and posting date controls.
+- 📊 **Market signals** – Dedicated analytics dashboard with hiring momentum, cross-country coverage, and in-demand technologies.
 - ☁️ **Cloudflare ready** – Designed for static deployment with data delivered from R2 via `VITE_JOBS_DATA_URL`.
 - ✅ **Quality assured** – Includes unit and integration tests powered by Vitest and Testing Library.
 - 🛡️ **Resilient data ingest** – Normalises Cloudflare R2 payloads and defends against network failures with tested fallbacks.
@@ -55,7 +55,7 @@ the user for this exercise is `https://6d9a56e137a3328cc52e48656dd30d91.r2.cloud
 
 - **Unit tests** cover the filtering logic to guarantee consistent search and filter behaviour.
 - **Integration tests** render the full application, mock the R2 fetch call, and validate that user flows (search and
-  remote-only filtering) operate end-to-end.
+  posting-date filtering) operate end-to-end.
 
 Run the full suite before every commit/deployment:
 

@@ -1,14 +1,28 @@
 import type { Job, JobFilters } from '../types/job'
 
-export const defaultFilters: JobFilters = {
-  searchTerm: '',
-  location: 'All locations',
-  jobType: 'All job types',
-  remoteOnly: false,
+export const DATE_POSTED_OPTIONS = [
+  'Any time',
+  'Past 24 hours',
+  'Past 3 days',
+  'Past week',
+  'Past 2 weeks',
+] as const
+
+const dateWindowInDays: Record<string, number> = {
+  'Past 24 hours': 1,
+  'Past 3 days': 3,
+  'Past week': 7,
+  'Past 2 weeks': 14,
 }
 
-const matchesSearch = (job: Job, term: string): boolean => {
-  if (!term) {
+export const defaultFilters: JobFilters = {
+  searchTerms: [],
+  location: 'All locations',
+  datePosted: DATE_POSTED_OPTIONS[0],
+}
+
+const matchesSearch = (job: Job, terms: string[]): boolean => {
+  if (!terms.length) {
     return true
   }
 
@@ -25,7 +39,7 @@ const matchesSearch = (job: Job, term: string): boolean => {
     .join(' ')
     .toLowerCase()
 
-  return haystack.includes(term)
+  return terms.every((term) => haystack.includes(term.toLowerCase()))
 }
 
 const matchesLocation = (job: Job, location: string): boolean => {
@@ -39,31 +53,36 @@ const matchesLocation = (job: Job, location: string): boolean => {
     .some((value) => value!.toLowerCase().includes(target))
 }
 
-const matchesJobType = (job: Job, jobType: string): boolean => {
-  if (!jobType || jobType === defaultFilters.jobType) {
+const matchesDatePosted = (job: Job, dateFilter: string): boolean => {
+  if (!dateFilter || dateFilter === defaultFilters.datePosted) {
     return true
   }
 
-  const normalisedType = jobType.toLowerCase()
-  return (job.jobType ?? '').toLowerCase().includes(normalisedType)
-}
-
-const matchesRemote = (job: Job, remoteOnly: boolean): boolean => {
-  if (!remoteOnly) {
+  const days = dateWindowInDays[dateFilter]
+  if (!days) {
     return true
   }
 
-  return job.isRemote === true
+  if (!job.postingDate) {
+    return false
+  }
+
+  const postingDate = new Date(job.postingDate)
+  if (Number.isNaN(postingDate.getTime())) {
+    return false
+  }
+
+  const now = new Date()
+  const windowStart = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
+  return postingDate >= windowStart
 }
 
 export const applyFilters = (jobs: Job[], filters: JobFilters): Job[] => {
-  const searchTerm = filters.searchTerm.trim().toLowerCase()
   return jobs.filter(
     (job) =>
-      matchesSearch(job, searchTerm) &&
+      matchesSearch(job, filters.searchTerms) &&
       matchesLocation(job, filters.location) &&
-      matchesJobType(job, filters.jobType) &&
-      matchesRemote(job, filters.remoteOnly),
+      matchesDatePosted(job, filters.datePosted),
   )
 }
 
@@ -80,13 +99,24 @@ export const deriveLocationOptions = (jobs: Job[]): string[] => {
   return [defaultFilters.location, ...Array.from(options).sort((a, b) => a.localeCompare(b))]
 }
 
-export const deriveJobTypeOptions = (jobs: Job[]): string[] => {
+export const deriveSearchOptions = (jobs: Job[]): string[] => {
   const options = new Set<string>()
+
   jobs.forEach((job) => {
-    if (job.jobType) {
-      options.add(job.jobType)
-    }
+    ;[
+      job.title,
+      job.company,
+      job.location,
+      job.jobType ?? undefined,
+      job.industry ?? undefined,
+    ]
+      .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+      .forEach((value) => options.add(value.trim()))
+
+    job.techSkills.forEach((skill) => options.add(skill))
+    job.softSkills.forEach((skill) => options.add(skill))
+    job.domainSkills.forEach((skill) => options.add(skill))
   })
 
-  return [defaultFilters.jobType, ...Array.from(options).sort((a, b) => a.localeCompare(b))]
+  return Array.from(options).sort((a, b) => a.localeCompare(b))
 }

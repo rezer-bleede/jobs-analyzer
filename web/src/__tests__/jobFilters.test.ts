@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import type { Job, JobFilters } from '../types/job'
 import { applyFilters, defaultFilters } from '../utils/jobFilters'
 
@@ -43,9 +43,12 @@ describe('applyFilters', () => {
     expect(result).toHaveLength(2)
   })
 
-  it('filters by search term across multiple fields', () => {
-    const jobs = [createJob({ id: '1' }), createJob({ id: '2', company: 'Cloud Analytics' })]
-    const result = applyFilters(jobs, withFilters({ searchTerm: 'cloud' }))
+  it('filters by multiple search terms across different fields', () => {
+    const jobs = [
+      createJob({ id: '1', company: 'Cloud Analytics', techSkills: ['Snowflake'] }),
+      createJob({ id: '2', company: 'Data Works', techSkills: ['dbt', 'Fivetran'] }),
+    ]
+    const result = applyFilters(jobs, withFilters({ searchTerms: ['cloud', 'snowflake'] }))
     expect(result).toHaveLength(1)
     expect(result[0].company).toBe('Cloud Analytics')
   })
@@ -60,17 +63,18 @@ describe('applyFilters', () => {
     expect(result[0].country).toBe('Saudi Arabia')
   })
 
-  it('filters by job type case-insensitively', () => {
-    const jobs = [createJob({ id: '1', jobType: 'Contract' }), createJob({ id: '2', jobType: 'Full-time' })]
-    const result = applyFilters(jobs, withFilters({ jobType: 'contract' }))
-    expect(result).toHaveLength(1)
-    expect(result[0].jobType).toBe('Contract')
-  })
+  it('filters by posting date window', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2025-01-15T00:00:00Z'))
+    const jobs = [
+      createJob({ id: '1', postingDate: '2025-01-14T00:00:00Z' }),
+      createJob({ id: '2', postingDate: '2024-12-30T00:00:00Z' }),
+    ]
 
-  it('filters by remote only flag', () => {
-    const jobs = [createJob({ id: '1', isRemote: true }), createJob({ id: '2', isRemote: false })]
-    const result = applyFilters(jobs, withFilters({ remoteOnly: true }))
+    const result = applyFilters(jobs, withFilters({ datePosted: 'Past 3 days' }))
+
     expect(result).toHaveLength(1)
-    expect(result[0].isRemote).toBe(true)
+    expect(result[0].id).toBe('1')
+    vi.useRealTimers()
   })
 })
