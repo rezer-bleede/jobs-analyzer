@@ -27,8 +27,7 @@ export interface Job {
 }
 
 export interface JobFilters {
-  searchTerm: string
+  searchTerms: string[]
   location: string
-  jobType: string
-  remoteOnly: boolean
+  datePosted: string
 }
