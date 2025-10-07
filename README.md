@@ -2,7 +2,8 @@
 
 This repository hosts a modern single-page application that spotlights data engineering opportunities across the Middle
 East. The site is designed to run as a static Cloudflare Pages deployment while sourcing live job listings from a JSON
-object stored in Cloudflare R2.
+object stored in Cloudflare R2. The landing experience is now streamlined for actionable content and adapts fluidly to
+mobile screens so job seekers can triage roles on the go.
 
 ## Project structure
 

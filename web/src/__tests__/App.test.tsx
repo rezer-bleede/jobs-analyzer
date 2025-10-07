@@ -48,6 +48,20 @@ describe('App', () => {
     vi.restoreAllMocks()
   })
 
+  it('shows a focused hero message with a call to action', async () => {
+    render(<App />)
+
+    expect(
+      await screen.findByRole('link', {
+        name: /browse open roles/i,
+      }),
+    ).toHaveAttribute('href', '#job-results')
+
+    expect(
+      await screen.findByText(/live metrics summarise total, remote, and company coverage/i),
+    ).toBeInTheDocument()
+  })
+
   it('renders job cards after fetching data', async () => {
     render(<App />)
 

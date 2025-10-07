@@ -6,6 +6,7 @@ across the Middle East by reading a JSON feed stored in Cloudflare R2.
 ## Features
 
 - 🎯 **Focused experience** – Highlights data engineering roles with company, location, and posting insights.
+- 📱 **Mobile-first design** – Responsive layout keeps the filters and results easy to read on phones and tablets.
 - 🔍 **Powerful filters** – Search by keyword, limit by country, job type, or remote-friendly opportunities.
 - 📊 **Market signals** – Summaries of active companies, cross-country coverage, and in-demand technologies.
 - ☁️ **Cloudflare ready** – Designed for static deployment with data delivered from R2 via `VITE_JOBS_DATA_URL`.
