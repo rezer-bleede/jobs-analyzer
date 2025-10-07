@@ -74,26 +74,44 @@ function App() {
 
   return (
     <div className="app bg-body-tertiary min-vh-100">
-      <main className="py-5">
+      <main className="py-4 py-md-5">
         <div className="container-lg">
-          <header className="hero bg-primary text-white rounded-5 p-5 mb-5 shadow-sm">
+          <header className="hero bg-primary text-white rounded-5 p-4 p-lg-5 mb-5 shadow-sm">
             <div className="row align-items-center g-4">
-              <div className="col-lg-8">
+              <div className="col-lg-7 col-xl-6 text-center text-lg-start">
                 <span className="badge bg-white text-primary fw-semibold text-uppercase mb-3">
                   Middle East · Data Engineering
                 </span>
-                <h1 className="display-5 fw-bold mb-3">
-                  Discover high-impact data engineering roles across the Middle East
+                <h1 className="hero__title fw-bold mb-3">
+                  Find your next data engineering role in minutes
                 </h1>
-                <p className="lead mb-4">
-                  Curated opportunities sourced from Cloudflare R2 to help data engineers find their next career move in
-                  Riyadh, Dubai, Doha, and beyond.
+                <p className="hero__subtitle lead mb-4 text-white-50">
+                  Browse vetted opportunities from Riyadh to Dubai and instantly filter by location, contract type, or
+                  remote-friendly roles.
                 </p>
-                <p className="mb-0 text-white-50">
-                  Keep this page deployed on Cloudflare Pages and configure the{' '}
-                  <code>VITE_JOBS_DATA_URL</code> variable with your R2 JSON file to stay in sync with the latest market
-                  demand.
-                </p>
+                <div className="hero__actions d-flex flex-column flex-sm-row gap-3 align-items-stretch align-items-sm-center">
+                  <a className="btn btn-light btn-lg text-primary fw-semibold shadow-sm" href="#job-results">
+                    Browse open roles
+                  </a>
+                  <div className="hero__actions-note small text-white-50">
+                    <span className="d-block fw-semibold text-white">Focused results</span>
+                    Zero fluff—just the roles and filters you need to plan your next move.
+                  </div>
+                </div>
+              </div>
+              <div className="col-lg-5 col-xl-4 ms-lg-auto">
+                <div className="hero-highlight bg-white text-primary-emphasis rounded-4 shadow-sm p-4">
+                  <h2 className="h5 fw-semibold mb-3">Why professionals use this board</h2>
+                  <ul className="hero-highlight__list list-unstyled mb-0 d-grid gap-2">
+                    <li>
+                      Live metrics summarise total, remote, and company coverage so you can prioritise outreach quickly.
+                    </li>
+                    <li>
+                      Instant keyword search keeps the focus on tools that matter—dbt, Spark, Snowflake, and more.
+                    </li>
+                    <li>Mobile-first layout lets you triage opportunities on the go.</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </header>
@@ -124,7 +142,10 @@ function App() {
 
           <SkillHighlights skills={skillFrequency} />
 
-          <section className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <section
+            id="job-results"
+            className="job-results__header d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"
+          >
             <h2 className="h4 mb-0">{isLoading ? 'Loading roles…' : `Showing ${filteredJobs.length} roles`}</h2>
             {!isLoading && jobs.length !== filteredJobs.length && (
               <span className="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-2">
