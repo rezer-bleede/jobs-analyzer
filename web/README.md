@@ -5,13 +5,18 @@ across the Middle East by reading a JSON feed stored in Cloudflare R2.
 
 ## Features
 
-- 🎯 **Focused experience** – Highlights data engineering roles with company, location, and posting insights.
+- 🎯 **Focused experience** – Condensed landing page with immediate access to filters, summary metrics, and job results.
 - 📱 **Mobile-first design** – Responsive layout keeps the filters and results easy to read on phones and tablets.
 - 🔍 **Powerful filters** – Multi-select keyword search with autocomplete, country filtering, and posting date controls.
-- 📊 **Market signals** – Dedicated analytics dashboard with hiring momentum, cross-country coverage, and in-demand technologies.
+- 📈 **Advanced analytics** – Hiring velocity sparkline, remote adoption donut, salary benchmarks, industry momentum, and
+  location coverage tables – all rendered with lightweight SVG charts.
+- 🧩 **Custom analytics workspace** – Compose bespoke bar, donut, or table widgets by grouping the live dataset across
+  companies, geographies, skills, remote status, and more.
 - ☁️ **Cloudflare ready** – Designed for static deployment with data delivered from R2 via `VITE_JOBS_DATA_URL`.
-- ✅ **Quality assured** – Includes unit and integration tests powered by Vitest and Testing Library.
-- 🛡️ **Resilient data ingest** – Normalises Cloudflare R2 payloads and defends against network failures with tested fallbacks.
+- ✅ **Quality assured** – Includes unit, integration, and analytics aggregation tests powered by Vitest and Testing
+  Library.
+- 🛡️ **Resilient data ingest** – Normalises Cloudflare R2 payloads and defends against network failures with tested
+  fallbacks.
 
 ## Getting started locally
 
@@ -53,7 +58,7 @@ the user for this exercise is `https://6d9a56e137a3328cc52e48656dd30d91.r2.cloud
 
 ## Testing strategy
 
-- **Unit tests** cover the filtering logic to guarantee consistent search and filter behaviour.
+- **Unit tests** cover the filtering logic and analytics aggregations to guarantee consistent insights.
 - **Integration tests** render the full application, mock the R2 fetch call, and validate that user flows (search and
   posting-date filtering) operate end-to-end.
 

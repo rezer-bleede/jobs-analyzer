@@ -38,12 +38,15 @@ describe('App', () => {
     mockJobsPayload[0].date_posted = now.toISOString()
     mockJobsPayload[1].date_posted = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
     vi.stubEnv('VITE_JOBS_DATA_URL', 'https://example.com/jobs.json')
-    vi.stubGlobal('fetch', vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockJobsPayload),
-      }) as unknown as Response,
-    ))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockJobsPayload),
+        }) as unknown as Response,
+      ),
+    )
   })
 
   afterEach(() => {
@@ -51,20 +54,12 @@ describe('App', () => {
     vi.restoreAllMocks()
   })
 
-  it('shows a focused hero message with a call to action', async () => {
+  it('presents a dense overview with quick access to analytics and results', async () => {
     render(<App />)
 
-    expect(
-      await screen.findByRole('link', {
-        name: /browse open roles/i,
-      }),
-    ).toHaveAttribute('href', '#job-results')
-
-    expect(await screen.findByRole('link', { name: /view market analytics/i })).toHaveAttribute(
-      'href',
-      '/analytics',
-    )
-    expect(await screen.findByText(/multi-select search and posting date filters/i)).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /jump to results/i })).toHaveAttribute('href', '#job-results')
+    expect(await screen.findByRole('link', { name: /view analytics/i })).toHaveAttribute('href', '/analytics')
+    expect(screen.getByRole('link', { name: /custom analytics/i })).toHaveAttribute('href', '/custom-analytics')
   })
 
   it('renders job cards after fetching data', async () => {
