@@ -2,14 +2,19 @@
 
 This repository hosts a modern single-page application that spotlights data engineering opportunities across the Middle
 East. The site is designed to run as a static Cloudflare Pages deployment while sourcing live job listings from a JSON
-object stored in Cloudflare R2. The landing experience is streamlined for actionable content, introduces an analytics
-dashboard with hiring trends, and adapts fluidly to mobile screens so job seekers can triage roles on the go.
+object stored in Cloudflare R2. The landing experience is now intentionally information-dense, the analytics suite
+includes trend charts, salary benchmarks, and geographic breakdowns, and users can assemble bespoke dashboards through a
+self-service workspace.
 
 ## Highlights
 
 - 🔍 Multi-select keyword search with autocomplete suggestions spanning job titles, companies, and in-demand skills.
 - 🗓️ Posting date filters (24 hours, 3 days, 1 week, 2 weeks) to surface the freshest opportunities instantly.
-- 📊 Dedicated analytics page summarising market metrics, recent hiring companies, and skills momentum.
+- 📊 Dedicated analytics page with hiring velocity, remote adoption, salary benchmarks, industry momentum, and skills
+  demand visualisations powered by bespoke SVG charts.
+- 🧩 Custom analytics workspace where power users can combine grouping dimensions (company, country, skills, remote
+  status, etc.) with bar, donut, or table widgets to answer ad-hoc questions.
+- 🧪 Automated unit + integration test coverage that validates data ingest, UI flows, and analytics aggregations.
 
 ## Project structure
 
@@ -40,7 +45,7 @@ dashboard with hiring trends, and adapts fluidly to mobile screens so job seeker
    npm run dev
    ```
 
-4. Execute the automated test suite (unit + integration):
+4. Execute the automated test suite (unit + integration + analytics helpers):
 
    ```bash
    npm test

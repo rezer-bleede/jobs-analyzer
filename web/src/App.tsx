@@ -3,6 +3,7 @@ import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import './App.css'
 import { HomePage } from './pages/HomePage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
+import { CustomAnalyticsPage } from './pages/CustomAnalyticsPage'
 import { fetchJobs } from './services/jobsService'
 import type { Job, JobFilters } from './types/job'
 import {
@@ -13,7 +14,15 @@ import {
   deriveSearchOptions,
 } from './utils/jobFilters'
 import { buildSkillFrequency } from './utils/skills'
-import { buildCompanyActivity, buildLocationActivity } from './utils/analytics'
+import {
+  buildCompanyActivity,
+  buildIndustryBreakdown,
+  buildLocationActivity,
+  buildLocationRemoteStats,
+  buildPostingTrends,
+  buildRemoteSplit,
+  buildSalaryBenchmarks,
+} from './utils/analytics'
 
 function App() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -57,6 +66,11 @@ function App() {
   const overallSkillFrequency = useMemo(() => buildSkillFrequency(jobs), [jobs])
   const companyActivity = useMemo(() => buildCompanyActivity(jobs), [jobs])
   const locationActivity = useMemo(() => buildLocationActivity(jobs, 8), [jobs])
+  const postingTrends = useMemo(() => buildPostingTrends(jobs, 12), [jobs])
+  const remoteSplit = useMemo(() => buildRemoteSplit(jobs), [jobs])
+  const salaryBenchmarks = useMemo(() => buildSalaryBenchmarks(jobs), [jobs])
+  const industryBreakdown = useMemo(() => buildIndustryBreakdown(jobs), [jobs])
+  const locationRemoteStats = useMemo(() => buildLocationRemoteStats(jobs, 10), [jobs])
 
   const filteredMetrics = useMemo(
     () => ({
@@ -94,12 +108,15 @@ function App() {
             <Link to="/" className="navbar-brand fs-4 fw-bold text-primary mb-0">
               ME Data Engineering Jobs
             </Link>
-            <nav className="d-flex gap-3">
+            <nav className="d-flex flex-wrap gap-2">
               <Link to="/" className="btn btn-link text-decoration-none fw-semibold text-primary">
                 Jobs board
               </Link>
-              <Link to="/analytics" className="btn btn-primary fw-semibold">
+              <Link to="/analytics" className="btn btn-outline-primary fw-semibold">
                 Analytics dashboard
+              </Link>
+              <Link to="/custom-analytics" className="btn btn-primary fw-semibold">
+                Custom analytics
               </Link>
             </nav>
           </div>
@@ -133,11 +150,20 @@ function App() {
                 metrics={overallMetrics}
                 companyActivity={companyActivity}
                 locationActivity={locationActivity}
+                locationRemoteStats={locationRemoteStats}
+                industryBreakdown={industryBreakdown}
+                salaryBenchmarks={salaryBenchmarks}
+                remoteSplit={remoteSplit}
+                postingTrends={postingTrends}
                 skillFrequency={overallSkillFrequency}
                 isLoading={isLoading}
                 error={error}
               />
             }
+          />
+          <Route
+            path="/custom-analytics"
+            element={<CustomAnalyticsPage jobs={jobs} isLoading={isLoading} error={error} />}
           />
         </Routes>
 

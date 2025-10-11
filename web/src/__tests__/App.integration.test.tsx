@@ -57,7 +57,7 @@ describe('App integration', () => {
     render(<App />)
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Unable to load jobs data')
+      expect(screen.getByRole('alert')).toHaveTextContent('We couldn’t load the latest opportunities')
       expect(screen.getByRole('alert')).toHaveTextContent('Network unavailable')
     })
   })
