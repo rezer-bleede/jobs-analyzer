@@ -1,0 +1,21 @@
+{
+  "name": "Jobs Analyzer - Middle East Data Engineering",
+  "short_name": "Jobs Analyzer",
+  "description": "Discover data engineering opportunities across the Middle East",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color":="#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/logo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    }
+  ]
+}

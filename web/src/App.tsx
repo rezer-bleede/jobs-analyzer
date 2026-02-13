@@ -157,8 +157,9 @@ function AppContent() {
     <div className="app bg-body-tertiary min-vh-100 d-flex flex-column">
       <header className="bg-white border-bottom">
         <div className="container-lg py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-          <Link to="/" className="navbar-brand fs-4 fw-bold text-primary mb-0">
-            ME Data Engineering Jobs
+          <Link to="/" className="navbar-brand fs-4 fw-bold text-primary mb-0 d-flex align-items-center gap-2 text-decoration-none">
+            <img src="/logo-icon.svg" alt="Jobs Analyzer" width="32" height="32" />
+            <span>Jobs Analyzer</span>
           </Link>
           <nav className="d-flex flex-wrap gap-2">
             <Link to="/" className="btn btn-link text-decoration-none fw-semibold text-primary">
