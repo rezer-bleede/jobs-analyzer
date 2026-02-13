@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { SummaryMetrics } from '../components/SummaryMetrics'
+import { DataFreshness } from '../components/DataFreshness'
 import { BarChart } from '../components/charts/BarChart'
 import { DonutChart } from '../components/charts/DonutChart'
 import { SparklineChart } from '../components/charts/SparklineChart'
@@ -61,6 +62,7 @@ export const AnalyticsPage = ({
   skillFrequency,
   isLoading,
   error,
+  metadata,
 }: AnalyticsPageProps) => (
   <main className="py-4 py-md-5">
     <div className="container-lg">
@@ -95,8 +97,9 @@ export const AnalyticsPage = ({
               Totals across the active dataset. Trends auto-refresh whenever the data feed updates.
             </p>
           </div>
-          <div className="text-lg-end text-body-secondary small">
-            Last refreshed {isLoading ? '…' : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date())}
+          <div className="text-lg-end text-body-secondary small d-flex flex-column align-items-lg-end gap-2">
+            <span>Last refreshed {isLoading ? '…' : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date())}</span>
+            <DataFreshness metadata={metadata} isLoading={isLoading} />
           </div>
         </div>
         <SummaryMetrics

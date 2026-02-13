@@ -3,6 +3,7 @@ import { FilterBar } from '../components/FilterBar'
 import { JobCard } from '../components/JobCard'
 import { SkillHighlights } from '../components/SkillHighlights'
 import { SummaryMetrics } from '../components/SummaryMetrics'
+import { DataFreshness } from '../components/DataFreshness'
 import type { Job, JobFilters } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
 import type { SkillFrequency } from '../utils/skills'
@@ -41,6 +42,7 @@ export const HomePage = ({
   metrics,
   isLoading,
   error,
+  metadata,
   onFiltersChange,
   onResetFilters,
 }: HomePageProps) => (
@@ -64,12 +66,13 @@ export const HomePage = ({
             </Link>
           </div>
         </div>
-        <div className="d-flex flex-wrap gap-3 mt-3 text-body-secondary small">
+        <div className="d-flex flex-wrap gap-3 mt-3 text-body-secondary small align-items-center">
           <span className="fw-semibold text-body">
             {isLoading ? 'Refreshing data…' : `${metrics.total} live roles · ${metrics.remote} remote`}
           </span>
           <span>Hiring companies: {isLoading ? '—' : metrics.companies}</span>
           <span>Regional coverage: {isLoading ? '—' : `${metrics.countries} countries`}</span>
+          <DataFreshness metadata={metadata} isLoading={isLoading} />
         </div>
       </header>
 
