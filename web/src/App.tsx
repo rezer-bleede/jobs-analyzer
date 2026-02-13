@@ -4,13 +4,15 @@ import './App.css'
 import { HomePage } from './pages/HomePage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { CustomAnalyticsPage } from './pages/CustomAnalyticsPage'
-import { fetchJobs } from './services/jobsService'
+import { fetchJobs, type FetchJobsResult } from './services/jobsService'
 import type { Job, JobFilters } from './types/job'
+import type { JobsMetadata } from './types/metadata'
 import {
   DATE_POSTED_OPTIONS,
   applyFilters,
   defaultFilters,
   deriveLocationOptions,
+  deriveCountryOptions,
   deriveSearchOptions,
 } from './utils/jobFilters'
 import { buildSkillFrequency } from './utils/skills'
@@ -24,8 +26,57 @@ import {
   buildSalaryBenchmarks,
 } from './utils/analytics'
 
-function App() {
+// Error Boundary Component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+            <p className="text-gray-600 mb-4">
+              We apologize for the inconvenience. Please try refreshing the page.
+            </p>
+            <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-40">
+              {this.state.error?.message}
+            </pre>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
+// Import React for ErrorBoundary
+import React from 'react'
+
+function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
+  const [metadata, setMetadata] = useState<JobsMetadata | null>(null)
   const [filters, setFilters] = useState<JobFilters>({ ...defaultFilters })
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
@@ -36,9 +87,10 @@ function App() {
       setIsLoading(true)
       setError(null)
       try {
-        const fetched = await fetchJobs()
+        const result: FetchJobsResult = await fetchJobs()
         if (!ignore) {
-          setJobs(fetched)
+          setJobs(result.jobs)
+          setMetadata(result.metadata)
         }
       } catch (err) {
         if (!ignore) {
@@ -61,6 +113,7 @@ function App() {
 
   const filteredJobs = useMemo(() => applyFilters(jobs, filters), [jobs, filters])
   const locationOptions = useMemo(() => deriveLocationOptions(jobs), [jobs])
+  const countryOptions = useMemo(() => deriveCountryOptions(jobs), [jobs])
   const searchOptions = useMemo(() => deriveSearchOptions(jobs), [jobs])
   const filteredSkillFrequency = useMemo(() => buildSkillFrequency(filteredJobs), [filteredJobs])
   const overallSkillFrequency = useMemo(() => buildSkillFrequency(jobs), [jobs])
@@ -101,77 +154,93 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <div className="app bg-body-tertiary min-vh-100 d-flex flex-column">
-        <header className="bg-white border-bottom">
-          <div className="container-lg py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <Link to="/" className="navbar-brand fs-4 fw-bold text-primary mb-0">
-              ME Data Engineering Jobs
+    <div className="app bg-body-tertiary min-vh-100 d-flex flex-column">
+      <header className="bg-white border-bottom">
+        <div className="container-lg py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <Link to="/" className="navbar-brand fs-4 fw-bold text-primary mb-0">
+            ME Data Engineering Jobs
+          </Link>
+          <nav className="d-flex flex-wrap gap-2">
+            <Link to="/" className="btn btn-link text-decoration-none fw-semibold text-primary">
+              Jobs board
             </Link>
-            <nav className="d-flex flex-wrap gap-2">
-              <Link to="/" className="btn btn-link text-decoration-none fw-semibold text-primary">
-                Jobs board
-              </Link>
-              <Link to="/analytics" className="btn btn-outline-primary fw-semibold">
-                Analytics dashboard
-              </Link>
-              <Link to="/custom-analytics" className="btn btn-primary fw-semibold">
-                Custom analytics
-              </Link>
-            </nav>
-          </div>
-        </header>
+            <Link to="/analytics" className="btn btn-outline-primary fw-semibold">
+              Analytics dashboard
+            </Link>
+            <Link to="/custom-analytics" className="btn btn-primary fw-semibold">
+              Custom analytics
+            </Link>
+          </nav>
+        </div>
+      </header>
 
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <HomePage
-                jobs={jobs}
-                filteredJobs={filteredJobs}
-                filters={filters}
-                locationOptions={locationOptions}
-                searchOptions={searchOptions}
-                datePostedOptions={DATE_POSTED_OPTIONS}
-                skillFrequency={filteredSkillFrequency}
-                metrics={filteredMetrics}
-                isLoading={isLoading}
-                error={error}
-                onFiltersChange={handleFiltersChange}
-                onResetFilters={handleReset}
-              />
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <AnalyticsPage
-                jobs={jobs}
-                metrics={overallMetrics}
-                companyActivity={companyActivity}
-                locationActivity={locationActivity}
-                locationRemoteStats={locationRemoteStats}
-                industryBreakdown={industryBreakdown}
-                salaryBenchmarks={salaryBenchmarks}
-                remoteSplit={remoteSplit}
-                postingTrends={postingTrends}
-                skillFrequency={overallSkillFrequency}
-                isLoading={isLoading}
-                error={error}
-              />
-            }
-          />
-          <Route
-            path="/custom-analytics"
-            element={<CustomAnalyticsPage jobs={jobs} isLoading={isLoading} error={error} />}
-          />
-        </Routes>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <HomePage
+              jobs={jobs}
+              filteredJobs={filteredJobs}
+              filters={filters}
+              locationOptions={locationOptions}
+              countryOptions={countryOptions}
+              searchOptions={searchOptions}
+              datePostedOptions={DATE_POSTED_OPTIONS}
+              skillFrequency={filteredSkillFrequency}
+              metrics={filteredMetrics}
+              isLoading={isLoading}
+              error={error}
+              metadata={metadata}
+              onFiltersChange={handleFiltersChange}
+              onResetFilters={handleReset}
+            />
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <AnalyticsPage
+              jobs={jobs}
+              metrics={overallMetrics}
+              companyActivity={companyActivity}
+              locationActivity={locationActivity}
+              locationRemoteStats={locationRemoteStats}
+              industryBreakdown={industryBreakdown}
+              salaryBenchmarks={salaryBenchmarks}
+              remoteSplit={remoteSplit}
+              postingTrends={postingTrends}
+              skillFrequency={overallSkillFrequency}
+              isLoading={isLoading}
+              error={error}
+              metadata={metadata}
+            />
+          }
+        />
+        <Route
+          path="/custom-analytics"
+          element={<CustomAnalyticsPage jobs={jobs} isLoading={isLoading} error={error} metadata={metadata} />}
+        />
+      </Routes>
 
-        <footer className="py-4 text-center text-body-secondary small mt-auto">
-          Built with ❤️ using React, Bootstrap, and Cloudflare Pages · Data source served from Cloudflare R2
-        </footer>
-      </div>
-    </BrowserRouter>
+      <footer className="py-4 text-center text-body-secondary small mt-auto">
+        Built with ❤️ using React, Bootstrap, and Cloudflare Pages · Data source served from Cloudflare R2
+      </footer>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
+        <AppContent />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

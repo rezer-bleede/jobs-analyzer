@@ -30,4 +30,5 @@ export interface JobFilters {
   searchTerms: string[]
   location: string
   datePosted: string
+  countries: string[]
 }

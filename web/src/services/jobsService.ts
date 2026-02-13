@@ -1,6 +1,17 @@
 import type { Job } from '../types/job'
 import { parseSkillList } from '../utils/skills'
 
+export interface JobsData {
+  metadata: {
+    lastUpdated: string
+    totalJobs: number
+    source: string
+    version: string
+    dataFreshness: string
+  }
+  jobs: RawJob[]
+}
+
 type RawJob = Record<string, unknown>
 
 const stringOrNull = (value: unknown): string | null => {
@@ -112,13 +123,33 @@ export const normaliseJobs = (data: unknown): Job[] => {
   if (!data) {
     return []
   }
+  
+  // Handle new format with metadata wrapper
+  if (typeof data === 'object' && data !== null && 'jobs' in data) {
+    const jobsData = data as JobsData
+    if (Array.isArray(jobsData.jobs)) {
+      return jobsData.jobs.map((item) => normaliseJob((item ?? {}) as RawJob))
+    }
+  }
+  
+  // Handle legacy array format
   if (Array.isArray(data)) {
     return data.map((item) => normaliseJob((item ?? {}) as RawJob))
   }
+  
   if (typeof data === 'object') {
     return [normaliseJob(data as RawJob)]
   }
+  
   throw new Error('Unsupported jobs payload received from the API')
+}
+
+export const extractMetadata = (data: unknown): JobsData['metadata'] | null => {
+  if (typeof data === 'object' && data !== null && 'metadata' in data) {
+    const jobsData = data as JobsData
+    return jobsData.metadata
+  }
+  return null
 }
 
 const describeError = (error: unknown, url: string): string => {
@@ -131,7 +162,7 @@ const describeError = (error: unknown, url: string): string => {
   return String(error)
 }
 
-const fetchFromUrl = async (url: string): Promise<Job[]> => {
+const fetchFromUrl = async (url: string): Promise<unknown> => {
   try {
     const response = await fetch(url)
     if (!response.ok) {
@@ -139,22 +170,31 @@ const fetchFromUrl = async (url: string): Promise<Job[]> => {
     }
 
     const payload = await response.json()
-    return normaliseJobs(payload)
+    return payload
   } catch (error) {
     throw error instanceof Error ? error : new Error(String(error))
   }
 }
 
+export interface FetchJobsResult {
+  jobs: Job[]
+  metadata: JobsData['metadata'] | null
+}
+
 export const fetchJobs = async (
   dataUrl = import.meta.env.VITE_JOBS_DATA_URL,
   fallbackUrl = '/jobs.json',
-): Promise<Job[]> => {
+): Promise<FetchJobsResult> => {
   const errors: string[] = []
   const trimmedPrimaryUrl = dataUrl?.trim()
 
   if (trimmedPrimaryUrl) {
     try {
-      return await fetchFromUrl(trimmedPrimaryUrl)
+      const payload = await fetchFromUrl(trimmedPrimaryUrl)
+      return {
+        jobs: normaliseJobs(payload),
+        metadata: extractMetadata(payload),
+      }
     } catch (error) {
       errors.push(`Primary source ${trimmedPrimaryUrl} failed: ${describeError(error, trimmedPrimaryUrl)}`)
     }
@@ -165,7 +205,11 @@ export const fetchJobs = async (
   const trimmedFallbackUrl = fallbackUrl?.trim()
   if (trimmedFallbackUrl) {
     try {
-      return await fetchFromUrl(trimmedFallbackUrl)
+      const payload = await fetchFromUrl(trimmedFallbackUrl)
+      return {
+        jobs: normaliseJobs(payload),
+        metadata: extractMetadata(payload),
+      }
     } catch (error) {
       errors.push(`Fallback source ${trimmedFallbackUrl} failed: ${describeError(error, trimmedFallbackUrl)}`)
     }

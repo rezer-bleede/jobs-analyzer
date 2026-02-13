@@ -19,6 +19,7 @@ export const defaultFilters: JobFilters = {
   searchTerms: [],
   location: 'All locations',
   datePosted: DATE_POSTED_OPTIONS[0],
+  countries: [],
 }
 
 const matchesSearch = (job: Job, terms: string[]): boolean => {
@@ -53,6 +54,20 @@ const matchesLocation = (job: Job, location: string): boolean => {
     .some((value) => value!.toLowerCase().includes(target))
 }
 
+const matchesCountries = (job: Job, countries: string[]): boolean => {
+  if (!countries.length) {
+    return true
+  }
+
+  const jobCountry = job.country?.toLowerCase() ?? ''
+  const jobLocation = job.location?.toLowerCase() ?? ''
+  
+  return countries.some((country) => {
+    const target = country.toLowerCase()
+    return jobCountry.includes(target) || jobLocation.includes(target)
+  })
+}
+
 const matchesDatePosted = (job: Job, dateFilter: string): boolean => {
   if (!dateFilter || dateFilter === defaultFilters.datePosted) {
     return true
@@ -82,6 +97,7 @@ export const applyFilters = (jobs: Job[], filters: JobFilters): Job[] => {
     (job) =>
       matchesSearch(job, filters.searchTerms) &&
       matchesLocation(job, filters.location) &&
+      matchesCountries(job, filters.countries) &&
       matchesDatePosted(job, filters.datePosted),
   )
 }
@@ -97,6 +113,17 @@ export const deriveLocationOptions = (jobs: Job[]): string[] => {
   })
 
   return [defaultFilters.location, ...Array.from(options).sort((a, b) => a.localeCompare(b))]
+}
+
+export const deriveCountryOptions = (jobs: Job[]): string[] => {
+  const options = new Set<string>()
+  jobs.forEach((job) => {
+    if (job.country) {
+      options.add(job.country)
+    }
+  })
+
+  return Array.from(options).sort((a, b) => a.localeCompare(b))
 }
 
 export const deriveSearchOptions = (jobs: Job[]): string[] => {

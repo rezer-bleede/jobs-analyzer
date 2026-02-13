@@ -4,6 +4,7 @@ import { BarChart } from '../components/charts/BarChart'
 import { DonutChart } from '../components/charts/DonutChart'
 import { SparklineChart } from '../components/charts/SparklineChart'
 import type { Job } from '../types/job'
+import type { JobsMetadata } from '../types/metadata'
 import type { SkillFrequency } from '../utils/skills'
 import type {
   CompanyActivity,
@@ -33,6 +34,7 @@ interface AnalyticsPageProps {
   skillFrequency: SkillFrequency[]
   isLoading: boolean
   error: string | null
+  metadata: JobsMetadata | null
 }
 
 const formatSalary = (value: number, currency: string): string => {

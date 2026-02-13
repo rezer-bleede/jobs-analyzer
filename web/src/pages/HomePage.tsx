@@ -4,6 +4,7 @@ import { JobCard } from '../components/JobCard'
 import { SkillHighlights } from '../components/SkillHighlights'
 import { SummaryMetrics } from '../components/SummaryMetrics'
 import type { Job, JobFilters } from '../types/job'
+import type { JobsMetadata } from '../types/metadata'
 import type { SkillFrequency } from '../utils/skills'
 
 interface HomePageProps {
@@ -11,6 +12,7 @@ interface HomePageProps {
   filteredJobs: Job[]
   filters: JobFilters
   locationOptions: string[]
+  countryOptions: string[]
   searchOptions: string[]
   datePostedOptions: readonly string[]
   skillFrequency: SkillFrequency[]
@@ -22,6 +24,7 @@ interface HomePageProps {
   }
   isLoading: boolean
   error: string | null
+  metadata: JobsMetadata | null
   onFiltersChange: (updates: Partial<JobFilters>) => void
   onResetFilters: () => void
 }
@@ -31,6 +34,7 @@ export const HomePage = ({
   filteredJobs,
   filters,
   locationOptions,
+  countryOptions,
   searchOptions,
   datePostedOptions,
   skillFrequency,
@@ -71,7 +75,7 @@ export const HomePage = ({
 
       {error && (
         <div className="alert alert-danger rounded-4 shadow-sm" role="alert">
-          <h2 className="h5">We couldn’t load the latest opportunities</h2>
+          <h2 className="h5">We couldn't load the latest opportunities</h2>
           <p className="mb-0">{error}</p>
         </div>
       )}
@@ -87,6 +91,7 @@ export const HomePage = ({
       <FilterBar
         filters={filters}
         locationOptions={locationOptions}
+        countryOptions={countryOptions}
         searchOptions={searchOptions}
         datePostedOptions={datePostedOptions}
         isLoading={isLoading}

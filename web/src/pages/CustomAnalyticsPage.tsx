@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Job } from '../types/job'
+import type { JobsMetadata } from '../types/metadata'
 import { BarChart } from '../components/charts/BarChart'
 import { DonutChart } from '../components/charts/DonutChart'
 
@@ -7,6 +8,7 @@ interface CustomAnalyticsPageProps {
   jobs: Job[]
   isLoading: boolean
   error: string | null
+  metadata: JobsMetadata | null
 }
 
 type GroupingField =

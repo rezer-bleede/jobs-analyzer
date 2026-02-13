@@ -36,6 +36,34 @@ describe('normaliseJobs', () => {
       softSkills: ['Communication'],
     })
   })
+
+  it('handles new metadata wrapper format', () => {
+    const payload = {
+      metadata: {
+        lastUpdated: '2026-01-01T00:00:00Z',
+        totalJobs: 1,
+        source: 'Test',
+        version: '1.0.0',
+        dataFreshness: 'live',
+      },
+      jobs: [
+        {
+          job_hash: 'job-1',
+          title: 'Test Engineer',
+          company: 'Test Co',
+          location: 'Dubai, UAE',
+        },
+      ],
+    }
+
+    const result = normaliseJobs(payload)
+    expect(result).toHaveLength(1)
+    expect(result[0]).toMatchObject({
+      id: 'job-1',
+      title: 'Test Engineer',
+      company: 'Test Co',
+    })
+  })
 })
 
 describe('fetchJobs', () => {
@@ -67,12 +95,49 @@ describe('fetchJobs', () => {
     const result = await fetchJobs('https://example.com/jobs.json')
 
     expect(fetchMock).toHaveBeenCalledWith('https://example.com/jobs.json')
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({
+    expect(result.jobs).toHaveLength(1)
+    expect(result.jobs[0]).toMatchObject({
       id: 'job-1',
       title: 'Staff Data Engineer',
       company: 'Data Corp',
       location: 'Riyadh, Saudi Arabia',
+    })
+    expect(result.metadata).toBeNull()
+  })
+
+  it('retrieves jobs with metadata from new format', async () => {
+    const payload = {
+      metadata: {
+        lastUpdated: '2026-01-01T00:00:00Z',
+        totalJobs: 1,
+        source: 'Test Source',
+        version: '1.0.0',
+        dataFreshness: 'live',
+      },
+      jobs: [
+        {
+          job_hash: 'job-meta',
+          title: 'Meta Engineer',
+          company: 'Meta Corp',
+          location: 'Dubai, UAE',
+        },
+      ],
+    }
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => payload,
+    })
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await fetchJobs('https://example.com/jobs.json')
+
+    expect(result.jobs).toHaveLength(1)
+    expect(result.metadata).toMatchObject({
+      lastUpdated: '2026-01-01T00:00:00Z',
+      totalJobs: 1,
+      source: 'Test Source',
     })
   })
 
@@ -101,8 +166,8 @@ describe('fetchJobs', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://example.com/jobs.json')
     expect(fetchMock).toHaveBeenNthCalledWith(2, '/jobs.json')
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({
+    expect(result.jobs).toHaveLength(1)
+    expect(result.jobs[0]).toMatchObject({
       id: 'job-2',
       title: 'Platform Data Engineer',
       company: 'Camel Cloud',
@@ -142,7 +207,7 @@ describe('fetchJobs', () => {
     const result = await fetchJobs('', '/jobs.json')
 
     expect(fetchMock).toHaveBeenCalledWith('/jobs.json')
-    expect(result[0]).toMatchObject({
+    expect(result.jobs[0]).toMatchObject({
       title: 'Data Reliability Engineer',
       company: 'Oasis Analytics',
     })
