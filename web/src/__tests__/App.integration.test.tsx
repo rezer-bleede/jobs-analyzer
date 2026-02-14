@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import App from '../App'
+import { ThemeProvider } from '../hooks/useTheme'
 
 describe('App integration', () => {
   let fetchMock: ReturnType<typeof vi.fn>
@@ -40,7 +41,11 @@ describe('App integration', () => {
       json: async () => payload,
     })
 
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     await waitFor(() => {
       expect(screen.getByText('Lead Analytics Engineer')).toBeInTheDocument()
@@ -54,7 +59,11 @@ describe('App integration', () => {
   it('displays an informative error message when fetching jobs fails', async () => {
     fetchMock.mockRejectedValue(new Error('Network unavailable'))
 
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent("We couldn't load the latest opportunities")

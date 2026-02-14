@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import './App.css'
+import { ThemeToggle } from './components/ThemeToggle'
 import { HomePage } from './pages/HomePage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { CustomAnalyticsPage } from './pages/CustomAnalyticsPage'
@@ -155,22 +156,23 @@ function AppContent() {
 
   return (
     <div className="app bg-body-tertiary min-vh-100 d-flex flex-column">
-      <header className="bg-white border-bottom">
-        <div className="container-lg py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
-          <Link to="/" className="navbar-brand fs-4 fw-bold text-primary mb-0 d-flex align-items-center gap-2 text-decoration-none">
+      <header className="bg-white dark:bg-gray-900 neon:bg-neon-surface border-b border-gray-200 dark:border-gray-700 neon:border-neon-pink/30">
+        <div className="container-lg py-3 flex flex-wrap justify-between items-center gap-3">
+          <Link to="/" className="text-xl font-bold text-blue-600 dark:text-blue-400 neon:text-neon-cyan flex items-center gap-2 no-underline">
             <img src="/logo-icon.svg" alt="Jobs Analyzer" width="32" height="32" />
             <span>Jobs Analyzer</span>
           </Link>
-          <nav className="d-flex flex-wrap gap-2">
-            <Link to="/" className="btn btn-link text-decoration-none fw-semibold text-primary">
+          <nav className="flex flex-wrap items-center gap-2">
+            <Link to="/" className="px-4 py-2 rounded-lg text-sm font-medium text-blue-600 dark:text-blue-400 neon:text-neon-cyan hover:bg-gray-100 dark:hover:bg-gray-800 neon:hover:bg-neon-surface-hover transition-colors no-underline">
               Jobs board
             </Link>
-            <Link to="/analytics" className="btn btn-outline-primary fw-semibold">
+            <Link to="/analytics" className="px-4 py-2 rounded-lg border border-blue-600 dark:border-blue-400 neon:border-neon-pink text-sm font-medium text-blue-600 dark:text-blue-400 neon:text-neon-pink hover:bg-blue-50 dark:hover:bg-blue-900/30 neon:hover:bg-neon-pink/10 transition-colors no-underline">
               Analytics dashboard
             </Link>
-            <Link to="/custom-analytics" className="btn btn-primary fw-semibold">
+            <Link to="/custom-analytics" className="px-4 py-2 rounded-lg bg-blue-600 dark:bg-blue-500 neon:bg-neon-lime text-white dark:text-white neon:text-gray-900 text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-600 neon:hover:bg-neon-lime/80 transition-colors no-underline">
               Custom analytics
             </Link>
+            <ThemeToggle />
           </nav>
         </div>
       </header>

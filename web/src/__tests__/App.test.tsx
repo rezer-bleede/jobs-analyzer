@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
+import { ThemeProvider } from '../hooks/useTheme'
 
 const mockJobsPayload = [
   {
@@ -55,7 +56,11 @@ describe('App', () => {
   })
 
   it('presents a dense overview with quick access to analytics and results', async () => {
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     expect(await screen.findByRole('link', { name: /jump to results/i })).toHaveAttribute('href', '#job-results')
     expect(await screen.findByRole('link', { name: /view analytics/i })).toHaveAttribute('href', '/analytics')
@@ -63,7 +68,11 @@ describe('App', () => {
   })
 
   it('renders job cards after fetching data', async () => {
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
 
     await waitFor(() => expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument())
     expect(screen.getByText('Data Platform Engineer')).toBeInTheDocument()
@@ -71,7 +80,11 @@ describe('App', () => {
   })
 
   it('filters jobs based on the search input', async () => {
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
     await waitFor(() => expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument())
 
     const searchInput = screen.getByLabelText(/search roles or companies/i)
@@ -82,7 +95,11 @@ describe('App', () => {
   })
 
   it('supports filtering by posting date', async () => {
-    render(<App />)
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
     await waitFor(() => expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument())
 
     const dateSelect = screen.getByLabelText(/date posted/i)

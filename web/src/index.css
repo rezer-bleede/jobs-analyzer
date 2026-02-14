@@ -35,6 +35,11 @@
     --foreground: 210 40% 98%;
   }
 
+  .neon {
+    --background: 260 20% 8%;
+    --foreground: 180 100% 95%;
+  }
+
   * {
     border-color: hsl(var(--border, 214.3 31.8% 91.4%));
   }
@@ -42,5 +47,23 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+  }
+
+  .neon {
+    --color-background: hsl(260 20% 8%);
+    --color-foreground: hsl(180 100% 95%);
+    --color-card: hsl(280 30% 12%);
+    --color-card-foreground: hsl(180 100% 95%);
+    --color-primary: hsl(320 100% 65%);
+    --color-primary-foreground: hsl(260 20% 8%);
+    --color-secondary: hsl(180 100% 50%);
+    --color-secondary-foreground: hsl(260 20% 8%);
+    --color-muted: hsl(280 30% 15%);
+    --color-muted-foreground: hsl(180 70% 60%);
+    --color-accent: hsl(130 100% 60%);
+    --color-accent-foreground: hsl(260 20% 8%);
+    --color-border: hsl(320 50% 30%);
+    --color-input: hsl(280 30% 15%);
+    --color-ring: hsl(180 100% 65%);
   }
 }

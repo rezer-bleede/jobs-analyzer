@@ -44,7 +44,7 @@ const formatSalary = (value: number, currency: string): string => {
   }
   try {
     return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)
-  } catch (error) {
+  } catch {
     return `${currency} ${value.toLocaleString()}`
   }
 }
