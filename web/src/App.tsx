@@ -5,6 +5,7 @@ import { ThemeToggle } from './components/ThemeToggle'
 import { HomePage } from './pages/HomePage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { CustomAnalyticsPage } from './pages/CustomAnalyticsPage'
+import { CompaniesPage } from './pages/CompaniesPage'
 import { fetchJobs, type FetchJobsResult } from './services/jobsService'
 import type { Job, JobFilters } from './types/job'
 import type { JobsMetadata } from './types/metadata'
@@ -172,6 +173,12 @@ function AppContent() {
               Jobs board
             </Link>
             <Link
+              to="/companies"
+              className="btn-ghost text-sm"
+            >
+              Companies
+            </Link>
+            <Link
               to="/analytics"
               className="btn-secondary text-sm"
             >
@@ -207,6 +214,17 @@ function AppContent() {
               metadata={metadata}
               onFiltersChange={handleFiltersChange}
               onResetFilters={handleReset}
+            />
+          }
+        />
+        <Route
+          path="/companies"
+          element={
+            <CompaniesPage
+              jobs={jobs}
+              isLoading={isLoading}
+              error={error}
+              metadata={metadata}
             />
           }
         />
