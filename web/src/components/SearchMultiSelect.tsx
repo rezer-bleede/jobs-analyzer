@@ -91,7 +91,7 @@ export const SearchMultiSelect = ({
         {label}
       </label>
       <div className="relative">
-        <div className="input-modern flex flex-wrap gap-2 items-center py-2 min-h-[46px]">
+        <div className="flex flex-wrap gap-2 items-center px-3 py-2 min-h-[46px] w-full border border-[hsl(var(--border))] rounded-[var(--radius-lg)] bg-[hsl(var(--background))] transition-all duration-200 focus-within:border-[hsl(var(--primary))] focus-within:shadow-[0_0_0_3px_rgba(124,58,237,0.15)]">
           {selected.map((term) => (
             <span
               key={term}
@@ -111,7 +111,7 @@ export const SearchMultiSelect = ({
           ))}
           <input
             id={inputId}
-            className="search-multi-select__input border-0 bg-transparent"
+            className="search-multi-select__input flex-1 min-w-0 border-0 bg-transparent outline-none"
             type="search"
             list={listId}
             placeholder={selected.length === 0 ? placeholder : ''}
