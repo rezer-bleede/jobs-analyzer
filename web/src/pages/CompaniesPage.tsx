@@ -40,7 +40,7 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
               <Building2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">{company.name}</h3>
             </div>
-            <div className="flex flex-wrap gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap gap-2 text-sm text-slate-500 dark:text-slate-300">
               <span className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
                 {company.jobCount} {company.jobCount === 1 ? 'role' : 'roles'}
@@ -108,7 +108,7 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
         <div className="border-t border-slate-200 dark:border-slate-700 p-5 bg-slate-50 dark:bg-slate-800/50">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Job Titles</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Job Titles</p>
               <div className="flex flex-wrap gap-1">
                 {company.jobTitles.map(title => (
                   <span key={title} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{title}</span>
@@ -116,7 +116,7 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
               </div>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Locations</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Locations</p>
               <div className="flex flex-wrap gap-1">
                 {company.locations.slice(0, 4).map(loc => (
                   <span key={loc} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{loc}</span>
@@ -127,7 +127,7 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
               </div>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Job Types</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Job Types</p>
               <div className="flex flex-wrap gap-1">
                 {company.jobTypes.map(type => (
                   <span key={type} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{type}</span>
@@ -135,7 +135,7 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
               </div>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Domain Skills</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Domain Skills</p>
               <div className="flex flex-wrap gap-1">
                 {company.topDomainSkills.map(skill => (
                   <span key={skill} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{skill}</span>
@@ -143,7 +143,7 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-300">
             <span className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
               Latest posting: {formatDate(company.latestPostingDate)}
@@ -185,14 +185,14 @@ export const CompaniesPage = ({ jobs, isLoading, error, metadata }: CompaniesPag
         <header className="flex flex-wrap justify-between items-start gap-4 mb-8">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Companies</h1>
-            <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+            <p className="text-slate-600 dark:text-slate-300 max-w-2xl">
               {isLoading
                 ? 'Loading company data...'
                 : `${companies.length.toLocaleString()} companies hiring across ${jobs.length.toLocaleString()} roles. Explore by industry, location, or skills.`}
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-sm text-slate-500 dark:text-slate-400">
+            <div className="text-sm text-slate-500 dark:text-slate-300">
               <DataFreshness metadata={metadata} isLoading={isLoading} />
             </div>
             <Link to="/" className="btn-secondary flex items-center gap-2">
@@ -210,9 +210,9 @@ export const CompaniesPage = ({ jobs, isLoading, error, metadata }: CompaniesPag
         )}
 
         <section className="section-card mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 lg:gap-4">
+            <div className="relative md:col-span-2 lg:col-span-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-300 pointer-events-none" />
               <input
                 type="text"
                 className="input-modern pl-10"
@@ -221,54 +221,52 @@ export const CompaniesPage = ({ jobs, isLoading, error, metadata }: CompaniesPag
                 onChange={(e) => updateFilter('search', e.target.value)}
               />
             </div>
-            <div className="flex flex-wrap gap-3">
-              <select
-                className="input-modern min-w-[140px]"
-                value={filters.industry}
-                onChange={(e) => updateFilter('industry', e.target.value)}
+            <select
+              className="input-modern lg:col-span-2"
+              value={filters.industry}
+              onChange={(e) => updateFilter('industry', e.target.value)}
+            >
+              {filterOptions.industries.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <select
+              className="input-modern lg:col-span-2"
+              value={filters.location}
+              onChange={(e) => updateFilter('location', e.target.value)}
+            >
+              {filterOptions.locations.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <select
+              className="input-modern lg:col-span-2"
+              value={filters.jobTitle}
+              onChange={(e) => updateFilter('jobTitle', e.target.value)}
+            >
+              {filterOptions.jobTitles.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <select
+              className="input-modern lg:col-span-2"
+              value={filters.jobType}
+              onChange={(e) => updateFilter('jobType', e.target.value)}
+            >
+              {filterOptions.jobTypes.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="btn-secondary flex items-center justify-center gap-1 md:col-span-2 lg:col-span-12 lg:justify-self-start"
               >
-                {filterOptions.industries.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-              <select
-                className="input-modern min-w-[140px]"
-                value={filters.location}
-                onChange={(e) => updateFilter('location', e.target.value)}
-              >
-                {filterOptions.locations.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-              <select
-                className="input-modern min-w-[140px]"
-                value={filters.jobTitle}
-                onChange={(e) => updateFilter('jobTitle', e.target.value)}
-              >
-                {filterOptions.jobTitles.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-              <select
-                className="input-modern min-w-[120px]"
-                value={filters.jobType}
-                onChange={(e) => updateFilter('jobType', e.target.value)}
-              >
-                {filterOptions.jobTypes.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-              {hasActiveFilters && (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="btn-secondary flex items-center gap-1"
-                >
-                  <X className="w-4 h-4" />
-                  Clear
-                </button>
-              )}
-            </div>
+                <X className="w-4 h-4" />
+                Clear filters
+              </button>
+            )}
           </div>
         </section>
 
@@ -293,7 +291,7 @@ export const CompaniesPage = ({ jobs, isLoading, error, metadata }: CompaniesPag
           <div className="section-card text-center py-12">
             <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No companies match your filters</h3>
-            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+            <p className="text-slate-500 dark:text-slate-300 max-w-md mx-auto">
               Try adjusting your search or clearing the filters to see more companies.
             </p>
             <button
