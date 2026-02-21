@@ -9,6 +9,7 @@ describe('App integration', () => {
 
   beforeEach(() => {
     vi.resetAllMocks()
+    localStorage.clear()
     fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     ;(import.meta.env as Record<string, string>).VITE_JOBS_DATA_URL = 'https://example.com/jobs.json'
@@ -16,6 +17,7 @@ describe('App integration', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    localStorage.clear()
     if (originalJobsUrl === undefined) {
       delete (import.meta.env as Record<string, string | undefined>).VITE_JOBS_DATA_URL
     } else {

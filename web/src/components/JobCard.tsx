@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { MapPin, Calendar, DollarSign, ExternalLink } from 'lucide-react'
 import type { Job } from '../types/job'
 
@@ -25,7 +26,7 @@ const formatSalaryRange = (job: Job): string | null => {
   return null
 }
 
-const renderSkills = (skills: string[], label: string) => {
+const SkillBadges = memo(({ skills, label }: { skills: string[]; label: string }) => {
   if (skills.length === 0) return null
 
   return (
@@ -40,9 +41,11 @@ const renderSkills = (skills: string[], label: string) => {
       </div>
     </div>
   )
-}
+})
 
-export const JobCard = ({ job }: { job: Job }) => {
+SkillBadges.displayName = 'SkillBadges'
+
+const JobCardContent = ({ job }: { job: Job }) => {
   const salaryLabel = formatSalaryRange(job)
   const remoteLabel =
     job.isRemote === true ? 'Remote' : job.isRemote === false ? 'On-site' : 'Hybrid'
@@ -93,8 +96,8 @@ export const JobCard = ({ job }: { job: Job }) => {
           <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-3">{job.summary}</p>
         )}
 
-        {renderSkills(job.techSkills, 'Key technologies')}
-        {renderSkills(job.domainSkills, 'Domain expertise')}
+        <SkillBadges skills={job.techSkills} label="Key technologies" />
+        <SkillBadges skills={job.domainSkills} label="Domain expertise" />
 
         <div className="mt-auto pt-4 flex flex-wrap gap-3 items-center">
           {job.jobUrl && (
@@ -118,3 +121,5 @@ export const JobCard = ({ job }: { job: Job }) => {
     </article>
   )
 }
+
+export const JobCard = memo(JobCardContent)

@@ -69,10 +69,12 @@ describe('normaliseJobs', () => {
 describe('fetchJobs', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    localStorage.clear()
   })
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    localStorage.clear()
   })
 
   it('retrieves and normalises jobs from the provided URL', async () => {

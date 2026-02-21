@@ -181,16 +181,64 @@ export interface FetchJobsResult {
   metadata: JobsData['metadata'] | null
 }
 
+const CACHE_KEY = 'jobs_analyzer_cache'
+const CACHE_TIMESTAMP_KEY = 'jobs_analyzer_cache_timestamp'
+const CACHE_TTL_MS = 30 * 60 * 1000
+
+interface CachedData {
+  payload: unknown
+  timestamp: number
+}
+
+const getCachedData = (): CachedData | null => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY)
+    const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY)
+    if (cached && timestamp) {
+      return {
+        payload: JSON.parse(cached),
+        timestamp: parseInt(timestamp, 10),
+      }
+    }
+  } catch {
+    localStorage.removeItem(CACHE_KEY)
+    localStorage.removeItem(CACHE_TIMESTAMP_KEY)
+  }
+  return null
+}
+
+const setCachedData = (payload: unknown): void => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload))
+    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString())
+  } catch {
+    // Storage full or unavailable, skip caching
+  }
+}
+
+const isCacheValid = (timestamp: number): boolean => {
+  return Date.now() - timestamp < CACHE_TTL_MS
+}
+
 export const fetchJobs = async (
   dataUrl = import.meta.env.VITE_JOBS_DATA_URL,
   fallbackUrl = '/jobs.json',
 ): Promise<FetchJobsResult> => {
+  const cached = getCachedData()
+  if (cached && isCacheValid(cached.timestamp)) {
+    return {
+      jobs: normaliseJobs(cached.payload),
+      metadata: extractMetadata(cached.payload),
+    }
+  }
+
   const errors: string[] = []
   const trimmedPrimaryUrl = dataUrl?.trim()
 
   if (trimmedPrimaryUrl) {
     try {
       const payload = await fetchFromUrl(trimmedPrimaryUrl)
+      setCachedData(payload)
       return {
         jobs: normaliseJobs(payload),
         metadata: extractMetadata(payload),
@@ -206,6 +254,7 @@ export const fetchJobs = async (
   if (trimmedFallbackUrl) {
     try {
       const payload = await fetchFromUrl(trimmedFallbackUrl)
+      setCachedData(payload)
       return {
         jobs: normaliseJobs(payload),
         metadata: extractMetadata(payload),
@@ -215,6 +264,13 @@ export const fetchJobs = async (
     }
   } else {
     errors.push('Fallback jobs data URL is empty.')
+  }
+
+  if (cached) {
+    return {
+      jobs: normaliseJobs(cached.payload),
+      metadata: extractMetadata(cached.payload),
+    }
   }
 
   throw new Error(

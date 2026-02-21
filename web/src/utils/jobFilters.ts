@@ -1,5 +1,35 @@
 import type { Job, JobFilters } from '../types/job'
 
+export const STANDARDIZED_COUNTRIES = [
+  'Saudi Arabia',
+  'United Arab Emirates',
+  'Qatar',
+  'Kuwait',
+  'Bahrain',
+  'Oman',
+] as const
+
+const COUNTRY_ALIASES: Record<string, string> = {
+  'uae': 'United Arab Emirates',
+  'u.a.e': 'United Arab Emirates',
+  'united arab emirates': 'United Arab Emirates',
+  'dubai': 'United Arab Emirates',
+  'abu dhabi': 'United Arab Emirates',
+  'saudi': 'Saudi Arabia',
+  'saudi arabia': 'Saudi Arabia',
+  'ksa': 'Saudi Arabia',
+  'qatar': 'Qatar',
+  'kuwait': 'Kuwait',
+  'bahrain': 'Bahrain',
+  'oman': 'Oman',
+}
+
+export const normalizeCountry = (country: string | undefined): string | null => {
+  if (!country) return null
+  const normalized = country.trim().toLowerCase()
+  return COUNTRY_ALIASES[normalized] ?? null
+}
+
 export const DATE_POSTED_OPTIONS = [
   'Any time',
   'Past 24 hours',
@@ -116,14 +146,21 @@ export const deriveLocationOptions = (jobs: Job[]): string[] => {
 }
 
 export const deriveCountryOptions = (jobs: Job[]): string[] => {
-  const options = new Set<string>()
+  const foundCountries = new Set<string>()
+  
   jobs.forEach((job) => {
     if (job.country) {
-      options.add(job.country)
+      const normalized = normalizeCountry(job.country)
+      if (normalized) {
+        foundCountries.add(normalized)
+      } else {
+        foundCountries.add(job.country)
+      }
     }
   })
 
-  return Array.from(options).sort((a, b) => a.localeCompare(b))
+  const sortedCountries = Array.from(foundCountries).sort((a, b) => a.localeCompare(b))
+  return sortedCountries.length > 0 ? sortedCountries : [...STANDARDIZED_COUNTRIES]
 }
 
 export const deriveSearchOptions = (jobs: Job[]): string[] => {
