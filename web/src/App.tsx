@@ -27,7 +27,8 @@ import {
   buildSalaryBenchmarks,
 } from './utils/analytics'
 
-// Error Boundary Component
+import React from 'react'
+
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error: Error | null }
@@ -48,18 +49,18 @@ class ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+          <div className="card-modern p-8 max-w-md w-full">
             <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
-            <p className="text-gray-600 mb-4">
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
               We apologize for the inconvenience. Please try refreshing the page.
             </p>
-            <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-40">
+            <pre className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg text-sm overflow-auto max-h-40 mb-4">
               {this.state.error?.message}
             </pre>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
+              className="btn-primary w-full"
             >
               Refresh Page
             </button>
@@ -71,9 +72,6 @@ class ErrorBoundary extends React.Component<
     return this.props.children
   }
 }
-
-// Import React for ErrorBoundary
-import React from 'react'
 
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
@@ -155,21 +153,34 @@ function AppContent() {
   }
 
   return (
-    <div className="app bg-body-tertiary min-vh-100 d-flex flex-column">
-      <header className="bg-white dark:bg-gray-900 neon:bg-neon-surface border-b border-gray-200 dark:border-gray-700 neon:border-neon-pink/30">
-        <div className="container-lg py-3 flex flex-wrap justify-between items-center gap-3">
-          <Link to="/" className="text-xl font-bold text-blue-600 dark:text-blue-400 neon:text-neon-cyan flex items-center gap-2 no-underline">
-            <img src="/logo-icon.svg" alt="Jobs Analyzer" width="32" height="32" />
-            <span>Jobs Analyzer</span>
+    <div className="app bg-slate-50 dark:bg-slate-950">
+      <header className="glass sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+          <Link to="/" className="flex items-center gap-3 no-underline group">
+            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
+              <img src="/logo-icon.svg" alt="" className="w-6 h-6" />
+            </div>
+            <span className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+              Jobs Analyzer
+            </span>
           </Link>
           <nav className="flex flex-wrap items-center gap-2">
-            <Link to="/" className="px-4 py-2 rounded-lg text-sm font-medium text-blue-600 dark:text-blue-400 neon:text-neon-cyan hover:bg-gray-100 dark:hover:bg-gray-800 neon:hover:bg-neon-surface-hover transition-colors no-underline">
+            <Link
+              to="/"
+              className="btn-ghost text-sm"
+            >
               Jobs board
             </Link>
-            <Link to="/analytics" className="px-4 py-2 rounded-lg border border-blue-600 dark:border-blue-400 neon:border-neon-pink text-sm font-medium text-blue-600 dark:text-blue-400 neon:text-neon-pink hover:bg-blue-50 dark:hover:bg-blue-900/30 neon:hover:bg-neon-pink/10 transition-colors no-underline">
-              Analytics dashboard
+            <Link
+              to="/analytics"
+              className="btn-secondary text-sm"
+            >
+              Analytics
             </Link>
-            <Link to="/custom-analytics" className="px-4 py-2 rounded-lg bg-blue-600 dark:bg-blue-500 neon:bg-neon-lime text-white dark:text-white neon:text-gray-900 text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-600 neon:hover:bg-neon-lime/80 transition-colors no-underline">
+            <Link
+              to="/custom-analytics"
+              className="btn-primary text-sm"
+            >
               Custom analytics
             </Link>
             <ThemeToggle />
@@ -225,8 +236,10 @@ function AppContent() {
         />
       </Routes>
 
-      <footer className="py-4 text-center text-body-secondary small mt-auto">
-        Built with ❤️ using React, Bootstrap, and Cloudflare Pages · Data source served from Cloudflare R2
+      <footer className="py-6 text-center text-slate-500 dark:text-slate-400 text-sm border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 mt-auto">
+        <div className="max-w-7xl mx-auto px-4">
+          Built with React, Tailwind CSS, and Cloudflare Pages · Data served from Cloudflare R2
+        </div>
       </footer>
     </div>
   )

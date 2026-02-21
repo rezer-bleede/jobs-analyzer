@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Plus, Trash2, TrendingUp, PieChart, Table } from 'lucide-react'
 import type { Job } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
 import { BarChart } from '../components/charts/BarChart'
@@ -50,59 +51,39 @@ const GROUPING_OPTIONS: { value: GroupingField; label: string; description: stri
   { value: 'softSkills', label: 'Soft skills', description: 'Recurring soft skills mentioned in job descriptions.' },
 ]
 
-const CHART_OPTIONS: { value: ChartType; label: string }[] = [
-  { value: 'table', label: 'Table' },
-  { value: 'bar', label: 'Horizontal bar' },
-  { value: 'donut', label: 'Donut' },
+const CHART_OPTIONS: { value: ChartType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { value: 'bar', label: 'Bar chart', icon: TrendingUp },
+  { value: 'donut', label: 'Donut chart', icon: PieChart },
+  { value: 'table', label: 'Table', icon: Table },
 ]
 
 const normalizeLabel = (value: unknown): string | null => {
-  if (value === null || value === undefined) {
-    return null
-  }
+  if (value === null || value === undefined) return null
   if (typeof value === 'string') {
     const trimmed = value.trim()
     return trimmed.length > 0 ? trimmed : null
   }
-  if (typeof value === 'boolean') {
-    return value ? 'Remote' : 'On-site'
-  }
-  if (Array.isArray(value)) {
-    return value.map((item) => normalizeLabel(item)).filter(Boolean).join(', ') || null
-  }
+  if (typeof value === 'boolean') return value ? 'Remote' : 'On-site'
+  if (Array.isArray(value)) return value.map((item) => normalizeLabel(item)).filter(Boolean).join(', ') || null
   return String(value)
 }
 
 const extractValues = (job: Job, field: GroupingField): string[] => {
   switch (field) {
-    case 'company':
-      return job.company ? [job.company] : []
-    case 'country':
-      return job.country ? [job.country] : []
-    case 'location':
-      return job.location ? [job.location] : []
-    case 'jobType':
-      return job.jobType ? [job.jobType] : []
-    case 'industry':
-      return job.industry ? [job.industry] : []
-    case 'currency':
-      return job.currency ? [job.currency] : []
-    case 'source':
-      return job.source ? [job.source] : []
+    case 'company': return job.company ? [job.company] : []
+    case 'country': return job.country ? [job.country] : []
+    case 'location': return job.location ? [job.location] : []
+    case 'jobType': return job.jobType ? [job.jobType] : []
+    case 'industry': return job.industry ? [job.industry] : []
+    case 'currency': return job.currency ? [job.currency] : []
+    case 'source': return job.source ? [job.source] : []
     case 'isRemote':
-      if (job.isRemote === true) {
-        return ['Remote']
-      }
-      if (job.isRemote === false) {
-        return ['On-site']
-      }
+      if (job.isRemote === true) return ['Remote']
+      if (job.isRemote === false) return ['On-site']
       return ['Unspecified']
-    case 'techSkills':
-      return job.techSkills
-    case 'softSkills':
-      return job.softSkills
-    default:
-      return []
+    case 'techSkills': return job.techSkills
+    case 'softSkills': return job.softSkills
+    default: return []
   }
 }
 
@@ -113,9 +94,7 @@ const aggregateByField = (jobs: Job[], field: GroupingField, limit: number): Agg
     const values = extractValues(job, field)
     values.forEach((value) => {
       const label = normalizeLabel(value)
-      if (!label) {
-        return
-      }
+      if (!label) return
       const current = counts.get(label) ?? 0
       counts.set(label, current + 1)
     })
@@ -130,12 +109,8 @@ const aggregateByField = (jobs: Job[], field: GroupingField, limit: number): Agg
 const getFieldLabel = (field: GroupingField): string => GROUPING_OPTIONS.find((option) => option.value === field)?.label ?? field
 
 const getDefaultChartType = (field: GroupingField): ChartType => {
-  if (field === 'isRemote') {
-    return 'donut'
-  }
-  if (field === 'currency') {
-    return 'table'
-  }
+  if (field === 'isRemote') return 'donut'
+  if (field === 'currency') return 'table'
   return 'bar'
 }
 
@@ -159,9 +134,7 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
   }, [jobs, widgets])
 
   const handleAddWidget = () => {
-    if (!selectedField) {
-      return
-    }
+    if (!selectedField) return
     const widgetId = `${selectedField}-${Date.now()}`
     setWidgets((current) => [
       ...current,
@@ -183,26 +156,25 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
   }
 
   return (
-    <main className="py-4 py-md-5">
-      <div className="container-lg">
-        <header className="mb-4">
-          <h1 className="h2 fw-bold mb-2">Custom analytics workspace</h1>
-          <p className="text-body-secondary mb-0">
-            Build bespoke charts and tables on top of the live dataset. Combine filters, grouping dimensions and visual styles
-            to answer ad-hoc questions quickly.
+    <main className="py-6 lg:py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="mb-8">
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Custom analytics workspace</h1>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+            Build bespoke charts and tables on top of the live dataset. Combine filters, grouping dimensions and visual styles to answer ad-hoc questions quickly.
           </p>
         </header>
 
-        <section className="bg-white rounded-4 shadow-sm p-4 p-lg-5 mb-4">
-          <h2 className="h4 fw-bold mb-3">Create a widget</h2>
-          <div className="row g-3 align-items-end">
-            <div className="col-12 col-md-4">
-              <label htmlFor="widget-field" className="form-label">
+        <section className="section-card mb-6">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Create a widget</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+            <div className="lg:col-span-4">
+              <label htmlFor="widget-field" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                 Group by
               </label>
               <select
                 id="widget-field"
-                className="form-select"
+                className="input-modern"
                 value={selectedField}
                 onChange={(event) => {
                   const field = event.target.value as GroupingField
@@ -216,17 +188,17 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
                   </option>
                 ))}
               </select>
-              <div className="form-text">
+              <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
                 {GROUPING_OPTIONS.find((option) => option.value === selectedField)?.description}
-              </div>
+              </p>
             </div>
-            <div className="col-12 col-md-3">
-              <label htmlFor="widget-chart" className="form-label">
+            <div className="lg:col-span-3">
+              <label htmlFor="widget-chart" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                 Visualisation
               </label>
               <select
                 id="widget-chart"
-                className="form-select"
+                className="input-modern"
                 value={selectedChart}
                 onChange={(event) => setSelectedChart(event.target.value as ChartType)}
               >
@@ -237,13 +209,13 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
                 ))}
               </select>
             </div>
-            <div className="col-6 col-md-2">
-              <label htmlFor="widget-limit" className="form-label">
+            <div className="lg:col-span-2">
+              <label htmlFor="widget-limit" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                 Rows
               </label>
               <input
                 id="widget-limit"
-                className="form-control"
+                className="input-modern"
                 type="number"
                 min={3}
                 max={50}
@@ -251,32 +223,33 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
                 onChange={(event) => setLimit(Math.max(3, Math.min(50, Number.parseInt(event.target.value, 10) || 10)))}
               />
             </div>
-            <div className="col-6 col-md-3 d-grid">
+            <div className="lg:col-span-3">
               <button
                 type="button"
-                className="btn btn-primary btn-lg fw-semibold"
+                className="btn-primary w-full flex items-center justify-center gap-2"
                 onClick={handleAddWidget}
                 disabled={isLoading || !hasData}
               >
+                <Plus className="w-4 h-4" />
                 Add widget
               </button>
             </div>
           </div>
           {!hasData && !isLoading && (
-            <p className="text-body-secondary small mb-0 mt-3">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
               Widgets appear once the jobs dataset has been loaded.
             </p>
           )}
         </section>
 
         {error && (
-          <div className="alert alert-danger rounded-4 shadow-sm" role="alert">
-            <h2 className="h5">Unable to load jobs data</h2>
-            <p className="mb-0">{error}</p>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+            <h2 className="font-semibold text-red-800 dark:text-red-200 mb-1">Unable to load jobs data</h2>
+            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
           </div>
         )}
 
-        <div className="d-flex flex-column gap-4">
+        <div className="flex flex-col gap-6">
           {widgets.map((widget) => {
             const data = aggregatedData[widget.id] ?? []
 
@@ -293,21 +266,19 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
                 )
               }
               return (
-                <div className="table-responsive">
-                  <table className="table table-sm align-middle mb-0">
+                <div className="overflow-x-auto">
+                  <table className="table-modern">
                     <thead>
                       <tr>
-                        <th scope="col">Value</th>
-                        <th scope="col" className="text-end">
-                          Roles
-                        </th>
+                        <th>Value</th>
+                        <th className="text-right">Roles</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.map((item) => (
                         <tr key={item.label}>
-                          <th scope="row">{item.label}</th>
-                          <td className="text-end">{item.value}</td>
+                          <td className="font-medium">{item.label}</td>
+                          <td className="text-right">{item.value.toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -317,21 +288,21 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
             }
 
             return (
-              <section key={widget.id} className="bg-white rounded-4 shadow-sm p-4 p-lg-5">
-                <div className="d-flex flex-wrap gap-3 justify-content-between align-items-start mb-3">
+              <section key={widget.id} className="section-card">
+                <div className="flex flex-wrap gap-4 justify-between items-start mb-4">
                   <div>
-                    <h2 className="h4 fw-bold mb-1">{getFieldLabel(widget.field)}</h2>
-                    <p className="text-body-secondary small mb-0">
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{getFieldLabel(widget.field)}</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       {GROUPING_OPTIONS.find((option) => option.value === widget.field)?.description}
                     </p>
                   </div>
-                  <div className="d-flex flex-wrap gap-2 align-items-center">
-                    <label className="form-label mb-0 me-2 text-body-secondary small" htmlFor={`chart-${widget.id}`}>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <label className="text-xs text-slate-500 dark:text-slate-400" htmlFor={`chart-${widget.id}`}>
                       Visual
                     </label>
                     <select
                       id={`chart-${widget.id}`}
-                      className="form-select form-select-sm"
+                      className="input-modern text-sm py-1.5 px-3"
                       value={widget.chartType}
                       onChange={(event) => updateWidget(widget.id, { chartType: event.target.value as ChartType })}
                     >
@@ -341,12 +312,12 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
                         </option>
                       ))}
                     </select>
-                    <label className="form-label mb-0 ms-3 me-2 text-body-secondary small" htmlFor={`limit-${widget.id}`}>
+                    <label className="text-xs text-slate-500 dark:text-slate-400 ml-2" htmlFor={`limit-${widget.id}`}>
                       Rows
                     </label>
                     <input
                       id={`limit-${widget.id}`}
-                      className="form-control form-control-sm"
+                      className="input-modern text-sm py-1.5 px-3 w-16"
                       type="number"
                       min={3}
                       max={50}
@@ -359,15 +330,15 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
                     />
                     <button
                       type="button"
-                      className="btn btn-outline-danger btn-sm"
+                      className="btn-ghost text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 ml-2"
                       onClick={() => handleRemoveWidget(widget.id)}
                     >
-                      Remove
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
                 {data.length === 0 ? (
-                  <p className="text-body-secondary mb-0">No data available for this widget.</p>
+                  <p className="text-slate-500 dark:text-slate-400">No data available for this widget.</p>
                 ) : (
                   renderContent()
                 )}

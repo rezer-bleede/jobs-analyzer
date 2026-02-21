@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ArrowLeft, Users, MapPin, DollarSign, Briefcase } from 'lucide-react'
 import { SummaryMetrics } from '../components/SummaryMetrics'
 import { DataFreshness } from '../components/DataFreshness'
 import { BarChart } from '../components/charts/BarChart'
@@ -39,9 +40,7 @@ interface AnalyticsPageProps {
 }
 
 const formatSalary = (value: number, currency: string): string => {
-  if (!Number.isFinite(value) || value <= 0) {
-    return '—'
-  }
+  if (!Number.isFinite(value) || value <= 0) return '—'
   try {
     return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(value)
   } catch {
@@ -53,7 +52,6 @@ export const AnalyticsPage = ({
   jobs,
   metrics,
   companyActivity,
-  locationActivity,
   locationRemoteStats,
   industryBreakdown,
   salaryBenchmarks,
@@ -64,41 +62,40 @@ export const AnalyticsPage = ({
   error,
   metadata,
 }: AnalyticsPageProps) => (
-  <main className="py-4 py-md-5">
-    <div className="container-lg">
-      <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <main className="py-6 lg:py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="flex flex-wrap justify-between items-start gap-4 mb-8">
         <div>
-          <h1 className="h2 fw-bold mb-1">Talent market analytics</h1>
-          <p className="text-body-secondary mb-0">
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Talent market analytics</h1>
+          <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
             {isLoading
-              ? 'Refreshing insights from the latest roles feed…'
-              : `${jobs.length} listings processed. Review velocity, remote adoption, salary benchmarks and geographic coverage.`}
+              ? 'Refreshing insights from the latest roles feed...'
+              : `${jobs.length.toLocaleString()} listings processed. Review velocity, remote adoption, salary benchmarks and geographic coverage.`}
           </p>
         </div>
-        <div className="d-flex flex-wrap gap-2">
-          <Link to="/" className="btn btn-outline-primary fw-semibold">
-            Back to jobs board
-          </Link>
-        </div>
-      </div>
+        <Link to="/" className="btn-secondary flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back to jobs
+        </Link>
+      </header>
 
       {error && (
-        <div className="alert alert-danger rounded-4 shadow-sm" role="alert">
-          <h2 className="h5">Analytics are temporarily unavailable</h2>
-          <p className="mb-0">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+          <h2 className="font-semibold text-red-800 dark:text-red-200 mb-1">Analytics are temporarily unavailable</h2>
+          <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
         </div>
       )}
 
-      <section className="bg-white rounded-4 shadow-sm p-4 p-lg-5 mb-4">
-        <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
+      <section className="section-card mb-6">
+        <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6">
           <div>
-            <h2 className="h4 fw-bold mb-2">Market snapshot</h2>
-            <p className="text-body-secondary mb-0">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Market snapshot</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Totals across the active dataset. Trends auto-refresh whenever the data feed updates.
             </p>
           </div>
-          <div className="text-lg-end text-body-secondary small d-flex flex-column align-items-lg-end gap-2">
-            <span>Last refreshed {isLoading ? '…' : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date())}</span>
+          <div className="lg:text-right text-sm text-slate-500 dark:text-slate-400 flex flex-col lg:items-end gap-2">
+            <span>Last refreshed {isLoading ? '...' : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date())}</span>
             <DataFreshness metadata={metadata} isLoading={isLoading} />
           </div>
         </div>
@@ -111,233 +108,192 @@ export const AnalyticsPage = ({
         />
       </section>
 
-      <div className="row g-4 mb-4">
-        <div className="col-12 col-lg-6">
-          <section className="bg-white rounded-4 shadow-sm p-4 h-100">
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h2 className="h5 fw-bold mb-1">Hiring velocity</h2>
-                <p className="text-body-secondary small mb-0">
-                  Weekly postings for the past quarter with remote contributions highlighted.
-                </p>
-              </div>
-              <span className="badge bg-primary-subtle text-primary-emphasis">{postingTrends.length} weeks</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="section-card">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Hiring velocity</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Weekly postings for the past quarter with remote contributions highlighted.
+              </p>
             </div>
-            <SparklineChart
-              data={postingTrends.map((point) => ({ label: point.label, value: point.total }))}
-              ariaLabel="Weekly job posting trend"
-            />
-            <div className="mt-3">
-              <BarChart
-                data={postingTrends
-                  .slice(-5)
-                  .map((point) => ({ label: point.label, value: point.total, secondaryValue: point.remote }))}
-                condensed
-                showValues
-                ariaLabel="Remote versus total postings for recent weeks"
-              />
-            </div>
-          </section>
-        </div>
-        <div className="col-12 col-lg-6">
-          <section className="bg-white rounded-4 shadow-sm p-4 h-100">
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h2 className="h5 fw-bold mb-1">Remote adoption</h2>
-                <p className="text-body-secondary small mb-0">
-                  Share of listings marked as remote, on-site, or unspecified.
-                </p>
-              </div>
-            </div>
-            <DonutChart segments={remoteSplit.map((segment) => ({ label: segment.label, value: segment.count }))} ariaLabel="Remote adoption split" />
-          </section>
-        </div>
-      </div>
-
-      <div className="row g-4 mb-4">
-        <div className="col-12 col-xl-6">
-          <section className="bg-white rounded-4 shadow-sm p-4 h-100">
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h2 className="h5 fw-bold mb-1">Salary benchmarks by currency</h2>
-                <p className="text-body-secondary small mb-0">
-                  Midpoint averages based on roles that disclose salary ranges.
-                </p>
-              </div>
-            </div>
-            {salaryBenchmarks.length === 0 ? (
-              <p className="text-body-secondary mb-0">No salary data available from the current dataset.</p>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-sm align-middle mb-0">
-                  <thead>
-                    <tr>
-                      <th scope="col">Currency</th>
-                      <th scope="col" className="text-end">
-                        Roles
-                      </th>
-                      <th scope="col" className="text-end">
-                        Avg midpoint
-                      </th>
-                      <th scope="col" className="text-end">
-                        Range
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {salaryBenchmarks.map((benchmark) => (
-                      <tr key={benchmark.currency}>
-                        <th scope="row">{benchmark.currency}</th>
-                        <td className="text-end">{benchmark.roles}</td>
-                        <td className="text-end">{formatSalary(Math.round(benchmark.average), benchmark.currency)}</td>
-                        <td className="text-end">
-                          {formatSalary(benchmark.minimum, benchmark.currency)} –{' '}
-                          {formatSalary(benchmark.maximum, benchmark.currency)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-        </div>
-        <div className="col-12 col-xl-6">
-          <section className="bg-white rounded-4 shadow-sm p-4 h-100">
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h2 className="h5 fw-bold mb-1">Industry momentum</h2>
-                <p className="text-body-secondary small mb-0">
-                  Top sectors currently investing in data engineering talent and their remote share.
-                </p>
-              </div>
-            </div>
+            <span className="badge badge-secondary">{postingTrends.length} weeks</span>
+          </div>
+          <SparklineChart
+            data={postingTrends.map((point) => ({ label: point.label, value: point.total }))}
+            ariaLabel="Weekly job posting trend"
+            height={120}
+          />
+          <div className="mt-4">
             <BarChart
-              data={industryBreakdown.map((item) => ({
-                label: item.industry,
-                value: item.roles,
-                secondaryValue: Math.round(item.remoteShare * item.roles),
-              }))}
-              ariaLabel="Industry hiring volume with remote roles highlighted"
-            />
-          </section>
-        </div>
-      </div>
-
-      <div className="row g-4 mb-4">
-        <div className="col-12 col-xl-6">
-          <section className="bg-white rounded-4 shadow-sm p-4 h-100">
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h2 className="h5 fw-bold mb-1">Most active companies</h2>
-                <p className="text-body-secondary small mb-0">
-                  Ranked by postings published in the last two weeks.
-                </p>
-              </div>
-            </div>
-            <BarChart
-              data={companyActivity.slice(0, 12).map((item) => ({ label: item.company, value: item.count }))}
-              ariaLabel="Companies ranked by job postings"
+              data={postingTrends
+                .slice(-5)
+                .map((point) => ({ label: point.label, value: point.total, secondaryValue: point.remote }))}
               condensed
+              showValues
+              ariaLabel="Remote versus total postings for recent weeks"
             />
-          </section>
+          </div>
         </div>
-        <div className="col-12 col-xl-6">
-          <section className="bg-white rounded-4 shadow-sm p-4 h-100">
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h2 className="h5 fw-bold mb-1">Location coverage</h2>
-                <p className="text-body-secondary small mb-0">
-                  Remote mix and totals for the busiest hiring locations.
-                </p>
-              </div>
+        <div className="section-card">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Remote adoption</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Share of listings marked as remote, on-site, or unspecified.
+              </p>
             </div>
-            {locationRemoteStats.length === 0 ? (
-              <p className="text-body-secondary mb-0">No locations available from the current dataset.</p>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-sm align-middle mb-0">
-                  <thead>
-                    <tr>
-                      <th scope="col">Location</th>
-                      <th scope="col" className="text-end">
-                        Roles
-                      </th>
-                      <th scope="col" className="text-end">
-                        Remote share
-                      </th>
-                      <th scope="col" className="text-end">
-                        Remote
-                      </th>
-                      <th scope="col" className="text-end">
-                        On-site
-                      </th>
-                      <th scope="col" className="text-end">
-                        Unspecified
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {locationRemoteStats.map((item) => (
-                      <tr key={item.location}>
-                        <th scope="row">{item.location}</th>
-                        <td className="text-end">{item.total}</td>
-                        <td className="text-end">{Math.round(item.remoteShare * 100)}%</td>
-                        <td className="text-end">{item.remote}</td>
-                        <td className="text-end">{item.onsite}</td>
-                        <td className="text-end">{item.unknown}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
+          </div>
+          <DonutChart segments={remoteSplit.map((segment) => ({ label: segment.label, value: segment.count }))} ariaLabel="Remote adoption split" />
         </div>
       </div>
 
-      <section className="bg-white rounded-4 shadow-sm p-4 p-lg-5 mb-4">
-        <h2 className="h4 fw-bold mb-3">Most in-demand skills</h2>
-        <p className="text-body-secondary mb-4">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+        <div className="section-card">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Salary benchmarks by currency</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Midpoint averages based on roles that disclose salary ranges.
+              </p>
+            </div>
+            <DollarSign className="w-5 h-5 text-slate-400" />
+          </div>
+          {salaryBenchmarks.length === 0 ? (
+            <p className="text-slate-500 dark:text-slate-400">No salary data available from the current dataset.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table-modern">
+                <thead>
+                  <tr>
+                    <th>Currency</th>
+                    <th className="text-right">Roles</th>
+                    <th className="text-right">Avg midpoint</th>
+                    <th className="text-right">Range</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {salaryBenchmarks.map((benchmark) => (
+                    <tr key={benchmark.currency}>
+                      <td className="font-medium">{benchmark.currency}</td>
+                      <td className="text-right">{benchmark.roles}</td>
+                      <td className="text-right font-medium text-violet-600 dark:text-violet-400">{formatSalary(Math.round(benchmark.average), benchmark.currency)}</td>
+                      <td className="text-right text-slate-500 dark:text-slate-400">
+                        {formatSalary(benchmark.minimum, benchmark.currency)} – {formatSalary(benchmark.maximum, benchmark.currency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        <div className="section-card">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Industry momentum</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Top sectors currently investing in data engineering talent.
+              </p>
+            </div>
+            <Briefcase className="w-5 h-5 text-slate-400" />
+          </div>
+          <BarChart
+            data={industryBreakdown.map((item) => ({
+              label: item.industry,
+              value: item.roles,
+              secondaryValue: Math.round(item.remoteShare * item.roles),
+            }))}
+            ariaLabel="Industry hiring volume with remote roles highlighted"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+        <div className="section-card">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Most active companies</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Ranked by postings published in the last two weeks.
+              </p>
+            </div>
+            <Users className="w-5 h-5 text-slate-400" />
+          </div>
+          <BarChart
+            data={companyActivity.slice(0, 10).map((item) => ({ label: item.company, value: item.count }))}
+            ariaLabel="Companies ranked by job postings"
+            condensed
+          />
+        </div>
+        <div className="section-card">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Location coverage</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Remote mix and totals for the busiest hiring locations.
+              </p>
+            </div>
+            <MapPin className="w-5 h-5 text-slate-400" />
+          </div>
+          {locationRemoteStats.length === 0 ? (
+            <p className="text-slate-500 dark:text-slate-400">No locations available from the current dataset.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table-modern">
+                <thead>
+                  <tr>
+                    <th>Location</th>
+                    <th className="text-right">Roles</th>
+                    <th className="text-right">Remote</th>
+                    <th className="text-right">On-site</th>
+                    <th className="text-right">Share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {locationRemoteStats.slice(0, 8).map((item) => (
+                    <tr key={item.location}>
+                      <td className="font-medium">{item.location}</td>
+                      <td className="text-right">{item.total}</td>
+                      <td className="text-right text-cyan-600 dark:text-cyan-400">{item.remote}</td>
+                      <td className="text-right">{item.onsite}</td>
+                      <td className="text-right">
+                        <span className={`badge ${item.remoteShare > 0.3 ? 'badge-success' : 'badge-secondary'}`}>
+                          {Math.round(item.remoteShare * 100)}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <section className="section-card mb-6">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Most in-demand skills</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
           Aggregated across every live listing. Highlighted skills appear most often in job descriptions.
         </p>
         {skillFrequency.length === 0 ? (
-          <p className="text-body-secondary mb-0">No skill data available.</p>
+          <p className="text-slate-500 dark:text-slate-400">No skill data available.</p>
         ) : (
-          <div className="d-flex flex-wrap gap-2">
-            {skillFrequency.slice(0, 24).map((skill) => (
+          <div className="flex flex-wrap gap-2">
+            {skillFrequency.slice(0, 24).map((skill, index) => (
               <span
                 key={skill.skill}
-                className="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-2"
+                className="badge transition-transform hover:scale-105"
+                style={{
+                  background: index < 5 
+                    ? 'linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%)'
+                    : undefined,
+                  fontWeight: index < 5 ? 600 : 500,
+                }}
               >
                 {skill.skill}
-                <span className="ms-1 text-body-secondary small">({skill.count})</span>
+                <span className="ml-1.5 opacity-60 text-xs">({skill.count})</span>
               </span>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section className="bg-white rounded-4 shadow-sm p-4 p-lg-5">
-        <h2 className="h4 fw-bold mb-3">Top hiring locations</h2>
-        <p className="text-body-secondary mb-4">
-          Where demand is strongest based on the current dataset.
-        </p>
-        {locationActivity.length === 0 ? (
-          <p className="text-body-secondary mb-0">No locations available from the current dataset.</p>
-        ) : (
-          <div className="row row-cols-1 row-cols-md-2 g-3">
-            {locationActivity.map((item) => (
-              <div className="col" key={item.location}>
-                <div className="border rounded-4 p-3 h-100 bg-light-subtle">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span className="fw-semibold">{item.location}</span>
-                    <span className="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-2">
-                      {item.count} roles
-                    </span>
-                  </div>
-                </div>
-              </div>
             ))}
           </div>
         )}

@@ -1,3 +1,13 @@
+import {
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Cell,
+  Tooltip,
+} from 'recharts'
+
 export interface BarChartDatum {
   label: string
   value: number
@@ -12,69 +22,80 @@ interface BarChartProps {
   condensed?: boolean
 }
 
-const formatNumber = (value: number): string => {
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1)}M`
-  }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(1)}k`
-  }
-  return value.toString()
+const COLORS = {
+  primary: '#7c3aed',
+  secondary: '#06b6d4',
 }
 
-export const BarChart = ({ data, maxValue, showValues = true, ariaLabel, condensed = false }: BarChartProps) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name: string }>; label?: string }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg px-3 py-2 text-sm">
+        <p className="font-medium text-slate-900 dark:text-white">{label}</p>
+        {payload.map((entry, index) => (
+          <p key={index} className="text-slate-600 dark:text-slate-400">
+            {entry.name}: {entry.value.toLocaleString()}
+          </p>
+        ))}
+      </div>
+    )
+  }
+  return null
+}
+
+export const BarChart = ({ data, showValues = true, ariaLabel, condensed = false }: BarChartProps) => {
   if (data.length === 0) {
-    return <p className="text-body-secondary mb-0">No data available.</p>
+    return <p className="text-slate-500 dark:text-slate-400">No data available.</p>
   }
 
-  const resolvedMaxValue =
-    maxValue ??
-    data.reduce((acc, item) => {
-      const candidate = item.secondaryValue ? Math.max(item.value, item.secondaryValue) : item.value
-      return Math.max(acc, candidate)
-    }, 0)
-
-  const containerClass = `d-flex flex-column ${condensed ? 'gap-2' : 'gap-3'}`
+  const chartData = data.map((item) => ({
+    name: item.label.length > 20 ? `${item.label.slice(0, 17)}...` : item.label,
+    fullName: item.label,
+    value: item.value,
+    secondaryValue: item.secondaryValue ?? 0,
+  }))
 
   return (
-    <div className={containerClass} role={ariaLabel ? 'list' : undefined} aria-label={ariaLabel}>
-      {data.map((item) => {
-        const valuePercentage = resolvedMaxValue > 0 ? Math.round((item.value / resolvedMaxValue) * 100) : 0
-        const secondaryPercentage =
-          item.secondaryValue !== undefined && resolvedMaxValue > 0
-            ? Math.round((item.secondaryValue / resolvedMaxValue) * 100)
-            : undefined
-
-        return (
-          <div key={item.label} role={ariaLabel ? 'listitem' : undefined}>
-            <div className={`d-flex align-items-baseline justify-content-between ${condensed ? 'mb-1' : ''}`}>
-              <span className="fw-semibold text-truncate me-3" title={item.label}>
-                {item.label}
-              </span>
-              {showValues && (
-                <span className="text-body-secondary small">
-                  {formatNumber(item.value)}
-                  {item.secondaryValue !== undefined && ` · ${formatNumber(item.secondaryValue)}`}
-                </span>
-              )}
-            </div>
-            <div className="position-relative bg-body-secondary bg-opacity-50 rounded-pill" style={{ height: condensed ? '0.5rem' : '0.75rem' }}>
-              <div
-                className="bg-primary rounded-pill"
-                style={{ width: `${valuePercentage}%`, height: '100%', transition: 'width 0.3s ease' }}
-                aria-hidden
+    <div className={condensed ? 'h-48' : 'h-64'} role={ariaLabel ? 'list' : undefined} aria-label={ariaLabel}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsBarChart
+          data={chartData}
+          layout="vertical"
+          margin={{ top: 0, right: showValues ? 60 : 20, left: 0, bottom: 0 }}
+        >
+          <XAxis type="number" hide />
+          <YAxis
+            type="category"
+            dataKey="name"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#64748b', fontSize: 12 }}
+            width={condensed ? 100 : 140}
+          />
+          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(124, 58, 237, 0.1)' }} />
+          <Bar
+            dataKey="value"
+            fill={COLORS.primary}
+            radius={[0, 4, 4, 0]}
+            barSize={condensed ? 16 : 24}
+          >
+            {chartData.map((_, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={index < 3 ? COLORS.primary : '#a78bfa'}
               />
-              {secondaryPercentage !== undefined && (
-                <div
-                  className="bg-success bg-opacity-75 rounded-pill position-absolute top-0"
-                  style={{ width: `${secondaryPercentage}%`, height: '100%', transition: 'width 0.3s ease' }}
-                  aria-hidden
-                />
-              )}
-            </div>
-          </div>
-        )
-      })}
+            ))}
+          </Bar>
+          {chartData.some((d) => d.secondaryValue > 0) && (
+            <Bar
+              dataKey="secondaryValue"
+              fill={COLORS.secondary}
+              radius={[0, 4, 4, 0]}
+              barSize={condensed ? 16 : 24}
+            />
+          )}
+        </RechartsBarChart>
+      </ResponsiveContainer>
     </div>
   )
 }

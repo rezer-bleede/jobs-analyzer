@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
+import { X } from 'lucide-react'
 
 interface SearchMultiSelectProps {
   label: string
@@ -28,9 +29,7 @@ export const SearchMultiSelect = ({
 
   const addTerm = (value: string) => {
     const trimmed = value.trim()
-    if (!trimmed) {
-      return
-    }
+    if (!trimmed) return
 
     const normalisedValue = normalise(trimmed)
     if (normalisedSelected.includes(normalisedValue)) {
@@ -88,29 +87,31 @@ export const SearchMultiSelect = ({
 
   return (
     <div>
-      <label htmlFor={inputId} className="form-label text-uppercase fw-semibold small text-secondary">
+      <label htmlFor={inputId} className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
         {label}
       </label>
-      <div className="search-multi-select position-relative">
-        <div className="form-control form-control-lg d-flex flex-wrap gap-2 align-items-center py-2">
+      <div className="relative">
+        <div className="input-modern flex flex-wrap gap-2 items-center py-2 min-h-[46px]">
           {selected.map((term) => (
             <span
               key={term}
-              className="badge bg-primary-subtle text-primary-emphasis rounded-pill d-flex align-items-center gap-2"
+              className="badge badge-primary flex items-center gap-1.5"
             >
               <span>{term}</span>
               <button
                 type="button"
-                className="btn-close btn-close-sm"
+                className="hover:bg-violet-200 dark:hover:bg-violet-700 rounded-full p-0.5 transition-colors"
                 aria-label={`Remove ${term}`}
                 onClick={() => removeTerm(term)}
                 disabled={disabled}
-              />
+              >
+                <X className="w-3 h-3" />
+              </button>
             </span>
           ))}
           <input
             id={inputId}
-            className="search-multi-select__input flex-grow-1 border-0 bg-transparent"
+            className="search-multi-select__input border-0 bg-transparent"
             type="search"
             list={listId}
             placeholder={selected.length === 0 ? placeholder : ''}

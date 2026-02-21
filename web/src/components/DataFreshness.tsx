@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Clock } from 'lucide-react'
 import type { JobsMetadata } from '../types/metadata'
 
 interface DataFreshnessProps {
@@ -9,7 +10,7 @@ interface DataFreshnessProps {
 export function DataFreshness({ metadata, isLoading }: DataFreshnessProps) {
   const freshness = useMemo(() => {
     if (!metadata?.lastUpdated) {
-      return { status: 'unknown', label: 'Unknown', color: 'gray' }
+      return { status: 'unknown', label: 'Unknown', colorClass: 'bg-slate-100 text-slate-600 border-slate-200' }
     }
 
     const lastUpdated = new Date(metadata.lastUpdated)
@@ -17,11 +18,11 @@ export function DataFreshness({ metadata, isLoading }: DataFreshnessProps) {
     const ageInHours = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
 
     if (ageInHours < 24) {
-      return { status: 'fresh', label: getTimeLabel(ageInHours), color: 'green' }
+      return { status: 'fresh', label: getTimeLabel(ageInHours), colorClass: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' }
     } else if (ageInHours < 168) {
-      return { status: 'recent', label: getTimeLabel(ageInHours), color: 'yellow' }
+      return { status: 'recent', label: getTimeLabel(ageInHours), colorClass: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' }
     } else {
-      return { status: 'stale', label: getTimeLabel(ageInHours), color: 'red' }
+      return { status: 'stale', label: getTimeLabel(ageInHours), colorClass: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' }
     }
   }, [metadata])
 
@@ -39,34 +40,23 @@ export function DataFreshness({ metadata, isLoading }: DataFreshnessProps) {
     }
   }
 
-  const colorClasses = {
-    green: 'bg-green-100 text-green-800 border-green-200',
-    yellow: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    red: 'bg-red-100 text-red-800 border-red-200',
-    gray: 'bg-gray-100 text-gray-800 border-gray-200',
-  }
-
   if (isLoading) {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 animate-pulse">
-        Loading data…
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 animate-pulse">
+        <Clock className="w-3 h-3" />
+        Loading...
       </span>
     )
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClasses[freshness.color as keyof typeof colorClasses]}`}
-        title={metadata?.lastUpdated ? `Last updated: ${formatDate(metadata.lastUpdated)}` : 'Data freshness unknown'}
-      >
-        {freshness.status === 'fresh' && '🟢'}
-        {freshness.status === 'recent' && '🟡'}
-        {freshness.status === 'stale' && '🔴'}
-        {freshness.status === 'unknown' && '⚪'}
-        <span className="ml-1">{freshness.label}</span>
-      </span>
-    </div>
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${freshness.colorClass}`}
+      title={metadata?.lastUpdated ? `Last updated: ${formatDate(metadata.lastUpdated)}` : 'Data freshness unknown'}
+    >
+      <Clock className="w-3 h-3" />
+      {freshness.label}
+    </span>
   )
 }
 

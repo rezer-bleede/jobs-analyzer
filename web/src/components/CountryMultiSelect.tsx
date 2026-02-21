@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { X, ChevronDown, Check } from 'lucide-react'
 
 interface CountryMultiSelectProps {
   label: string
@@ -52,47 +53,48 @@ export const CountryMultiSelect = ({
     onChange(selected.filter((c) => c !== country))
   }
 
-  const displayText = selected.length === 0 
-    ? placeholder 
-    : `${selected.length} country${selected.length > 1 ? 'ies' : 'y'} selected`
+  const displayText = selected.length === 0
+    ? placeholder
+    : `${selected.length} countr${selected.length > 1 ? 'ies' : 'y'} selected`
 
   return (
-    <div ref={containerRef} className="position-relative">
-      <label className="form-label text-uppercase fw-semibold small text-secondary">
+    <div ref={containerRef} className="relative">
+      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
         {label}
       </label>
-      
+
       <button
         type="button"
-        className="form-select form-select-lg text-start d-flex justify-content-between align-items-center"
+        className="input-modern flex justify-between items-center text-left"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
       >
-        <span className={selected.length === 0 ? 'text-muted' : ''}>
+        <span className={selected.length === 0 ? 'text-slate-400 dark:text-slate-500' : ''}>
           {displayText}
         </span>
-        <span className="ms-2">▼</span>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {selected.length > 0 && (
-        <div className="d-flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap gap-1.5 mt-2">
           {selected.map((country) => (
             <span
               key={country}
-              className="badge bg-primary-subtle text-primary-emphasis rounded-pill d-flex align-items-center gap-1"
+              className="badge badge-primary flex items-center gap-1.5"
             >
               <span>{countryFlags[country] || '🌍'}</span>
               <span>{country}</span>
               <button
                 type="button"
-                className="btn-close btn-close-sm ms-1"
-                style={{ fontSize: '0.5rem' }}
+                className="hover:bg-violet-200 dark:hover:bg-violet-700 rounded-full p-0.5 transition-colors"
                 onClick={() => removeCountry(country)}
                 aria-label={`Remove ${country}`}
                 disabled={disabled}
-              />
+              >
+                <X className="w-3 h-3" />
+              </button>
             </span>
           ))}
         </div>
@@ -100,53 +102,50 @@ export const CountryMultiSelect = ({
 
       {isOpen && (
         <div
-          className="position-absolute top-100 start-0 w-100 mt-1 bg-white border rounded shadow-lg"
-          style={{ zIndex: 1000, maxHeight: '300px', overflowY: 'auto' }}
+          className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 max-h-72 overflow-y-auto animate-fade-in"
           role="listbox"
         >
-          <div className="p-2">
-            <div className="d-flex gap-2 mb-2 pb-2 border-bottom">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => onChange([...options])}
-                disabled={selected.length === options.length}
-              >
-                Select All
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => onChange([])}
-                disabled={selected.length === 0}
-              >
-                Clear All
-              </button>
-            </div>
-            
-            {options.map((country) => (
-              <div
-                key={country}
-                className="form-check py-1"
-                role="option"
-                aria-selected={selected.includes(country)}
-              >
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id={`country-${country}`}
-                  checked={selected.includes(country)}
-                  onChange={() => toggleCountry(country)}
-                />
-                <label
-                  className="form-check-label d-flex align-items-center gap-2"
-                  htmlFor={`country-${country}`}
+          <div className="p-2 border-b border-slate-200 dark:border-slate-700 flex gap-2">
+            <button
+              type="button"
+              className="btn-ghost text-xs flex-1 py-1.5"
+              onClick={() => onChange([...options])}
+              disabled={selected.length === options.length}
+            >
+              Select All
+            </button>
+            <button
+              type="button"
+              className="btn-ghost text-xs flex-1 py-1.5"
+              onClick={() => onChange([])}
+              disabled={selected.length === 0}
+            >
+              Clear
+            </button>
+          </div>
+
+          <div className="p-1">
+            {options.map((country) => {
+              const isSelected = selected.includes(country)
+              return (
+                <button
+                  key={country}
+                  type="button"
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
+                    isSelected
+                      ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
+                      : 'hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                  }`}
+                  onClick={() => toggleCountry(country)}
+                  role="option"
+                  aria-selected={isSelected}
                 >
-                  <span className="fs-5">{countryFlags[country] || '🌍'}</span>
-                  <span>{country}</span>
-                </label>
-              </div>
-            ))}
+                  <span className="text-lg">{countryFlags[country] || '🌍'}</span>
+                  <span className="flex-1 font-medium">{country}</span>
+                  {isSelected && <Check className="w-4 h-4 text-violet-600 dark:text-violet-400" />}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

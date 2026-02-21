@@ -1,3 +1,13 @@
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts'
+
 export interface SparklineDatum {
   label: string
   value: number
@@ -10,37 +20,51 @@ interface SparklineChartProps {
   ariaLabel?: string
 }
 
-export const SparklineChart = ({ data, height = 64, strokeColor = '#0d6efd', ariaLabel }: SparklineChartProps) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg px-3 py-2 text-sm">
+        <p className="font-medium text-slate-900 dark:text-white">{label}</p>
+        <p className="text-violet-600 dark:text-violet-400">{payload[0].value.toLocaleString()} postings</p>
+      </div>
+    )
+  }
+  return null
+}
+
+export const SparklineChart = ({ data, height = 100, ariaLabel }: SparklineChartProps) => {
   if (data.length === 0) {
-    return <p className="text-body-secondary mb-0">No data available.</p>
+    return <p className="text-slate-500 dark:text-slate-400">No data available.</p>
   }
 
-  const width = data.length * 36
-  const values = data.map((item) => item.value)
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  const range = max - min || 1
-
-  const points = data
-    .map((item, index) => {
-      const x = (index / (data.length - 1 || 1)) * width
-      const y = height - ((item.value - min) / range) * height
-      return `${x},${y}`
-    })
-    .join(' ')
+  const chartData = data.map((item) => ({
+    name: item.label,
+    value: item.value,
+  }))
 
   return (
-    <figure className="mb-0" aria-label={ariaLabel}>
-      <svg width="100%" viewBox={`0 0 ${width} ${height}`} role="img" aria-hidden={!ariaLabel}>
-        <title>{ariaLabel}</title>
-        <polyline points={points} fill="none" stroke={strokeColor} strokeWidth="3" strokeLinecap="round" />
-        {data.map((item, index) => {
-          const x = (index / (data.length - 1 || 1)) * width
-          const y = height - ((item.value - min) / range) * height
-          return <circle key={item.label} cx={x} cy={y} r="4" fill={strokeColor} />
-        })}
-      </svg>
-      <figcaption className="visually-hidden">{data.map((item) => `${item.label}: ${item.value}`).join(', ')}</figcaption>
-    </figure>
+    <div style={{ height }} role={ariaLabel ? 'img' : undefined} aria-label={ariaLabel}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#7c3aed" stopOpacity={0.3} />
+              <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis dataKey="name" hide />
+          <YAxis hide />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke="#7c3aed"
+            strokeWidth={2}
+            fill="url(#colorValue)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   )
 }

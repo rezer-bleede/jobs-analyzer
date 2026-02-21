@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react'
+import { RotateCcw } from 'lucide-react'
 import type { JobFilters } from '../types/job'
 import { SearchMultiSelect } from './SearchMultiSelect'
 import { CountryMultiSelect } from './CountryMultiSelect'
@@ -14,14 +14,6 @@ interface FilterBarProps {
   onReset: () => void
 }
 
-const handleTextChange = (
-  event: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  onChange: (updates: Partial<JobFilters>) => void,
-) => {
-  const { name, value } = event.target
-  onChange({ [name]: value } as Partial<JobFilters>)
-}
-
 export const FilterBar = ({
   filters,
   locationOptions,
@@ -33,10 +25,10 @@ export const FilterBar = ({
   onReset,
 }: FilterBarProps) => {
   return (
-    <section className="filter-bar bg-white rounded-4 shadow-sm p-4 mb-4">
-      <div className="d-flex flex-column gap-3">
-        <div className="d-flex flex-column flex-lg-row gap-3 align-items-lg-end">
-          <div className="flex-grow-1 w-100">
+    <section className="section-card mb-6">
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div className="lg:col-span-5">
             <SearchMultiSelect
               label="Search roles or companies"
               placeholder="Search by title, company, technology, or keywords"
@@ -46,16 +38,15 @@ export const FilterBar = ({
               disabled={isLoading}
             />
           </div>
-          <div className="flex-grow-1 w-100">
-            <label htmlFor="location" className="form-label text-uppercase fw-semibold small text-secondary">
+          <div className="lg:col-span-3">
+            <label htmlFor="location-filter" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Location
             </label>
             <select
-              id="location"
-              name="location"
-              className="form-select form-select-lg"
+              id="location-filter"
+              className="input-modern"
               value={filters.location}
-              onChange={(event) => handleTextChange(event, onChange)}
+              onChange={(e) => onChange({ location: e.target.value })}
               disabled={isLoading}
             >
               {locationOptions.map((option) => (
@@ -65,16 +56,15 @@ export const FilterBar = ({
               ))}
             </select>
           </div>
-          <div className="flex-grow-1 w-100">
-            <label htmlFor="datePosted" className="form-label text-uppercase fw-semibold small text-secondary">
+          <div className="lg:col-span-2">
+            <label htmlFor="date-posted" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
               Date posted
             </label>
             <select
-              id="datePosted"
-              name="datePosted"
-              className="form-select form-select-lg"
+              id="date-posted"
+              className="input-modern"
               value={filters.datePosted}
-              onChange={(event) => handleTextChange(event, onChange)}
+              onChange={(e) => onChange({ datePosted: e.target.value })}
               disabled={isLoading}
             >
               {datePostedOptions.map((option) => (
@@ -84,20 +74,21 @@ export const FilterBar = ({
               ))}
             </select>
           </div>
-          <div className="flex-shrink-0">
+          <div className="lg:col-span-2 flex items-end">
             <button
               type="button"
-              className="btn btn-outline-secondary btn-lg text-nowrap"
+              className="btn-secondary w-full flex items-center justify-center gap-2"
               onClick={onReset}
               disabled={isLoading}
             >
-              Reset filters
+              <RotateCcw className="w-4 h-4" />
+              Reset
             </button>
           </div>
         </div>
-        
+
         {countryOptions.length > 0 && (
-          <div className="w-100" style={{ maxWidth: '400px' }}>
+          <div className="max-w-md">
             <CountryMultiSelect
               label="Countries"
               placeholder="Filter by countries"

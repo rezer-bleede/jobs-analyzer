@@ -1,13 +1,10 @@
+import { MapPin, Calendar, DollarSign, ExternalLink } from 'lucide-react'
 import type { Job } from '../types/job'
 
 const formatDate = (value?: string | null): string => {
-  if (!value) {
-    return 'Date not provided'
-  }
+  if (!value) return 'Date not provided'
   const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) {
-    return 'Date not provided'
-  }
+  if (Number.isNaN(parsed.getTime())) return 'Date not provided'
   return parsed.toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -29,16 +26,14 @@ const formatSalaryRange = (job: Job): string | null => {
 }
 
 const renderSkills = (skills: string[], label: string) => {
-  if (skills.length === 0) {
-    return null
-  }
+  if (skills.length === 0) return null
 
   return (
-    <div className="mt-3">
-      <p className="text-uppercase small fw-semibold text-secondary mb-2">{label}</p>
-      <div className="d-flex flex-wrap gap-2">
+    <div className="mt-4">
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">{label}</p>
+      <div className="flex flex-wrap gap-2">
         {skills.map((skill) => (
-          <span key={skill} className="badge rounded-pill bg-primary-subtle text-primary-emphasis">
+          <span key={skill} className="badge badge-primary">
             {skill}
           </span>
         ))}
@@ -50,45 +45,72 @@ const renderSkills = (skills: string[], label: string) => {
 export const JobCard = ({ job }: { job: Job }) => {
   const salaryLabel = formatSalaryRange(job)
   const remoteLabel =
-    job.isRemote === true ? 'Remote friendly' : job.isRemote === false ? 'On-site' : 'Hybrid / flexible'
+    job.isRemote === true ? 'Remote' : job.isRemote === false ? 'On-site' : 'Hybrid'
 
   return (
-    <article className="card job-card shadow-sm border-0 h-100">
-      <div className="card-body p-4 d-flex flex-column">
-        <div className="d-flex flex-column flex-md-row justify-content-between gap-3">
-          <div>
-            <div className="d-flex align-items-center gap-2 mb-2">
-              <span className="badge bg-gradient rounded-pill text-uppercase small fw-semibold text-bg-secondary">
+    <article className="job-card bg-white dark:bg-slate-900 rounded-2xl overflow-hidden h-full flex flex-col">
+      <div className="p-6 flex flex-col flex-1">
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="badge badge-secondary text-xs uppercase font-semibold">
                 {job.source ?? 'External'}
               </span>
-              <span className="badge bg-info-subtle text-info-emphasis rounded-pill text-uppercase small fw-semibold">
+              <span className={`badge text-xs font-semibold ${job.isRemote === true ? 'badge-success' : 'badge-accent'}`}>
                 {remoteLabel}
               </span>
             </div>
-            <h3 className="h4 mb-1">{job.title}</h3>
-            <p className="mb-2 text-secondary fw-semibold">{job.company}</p>
-            <p className="mb-0 text-body-secondary">{job.location}</p>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 line-clamp-2">{job.title}</h3>
+            <p className="text-slate-600 dark:text-slate-300 font-medium">{job.company}</p>
           </div>
-          <div className="text-md-end">
-            {job.jobType && <p className="mb-1 text-uppercase small fw-semibold text-secondary">{job.jobType}</p>}
-            <p className="mb-1 text-body-secondary">Posted {formatDate(job.postingDate)}</p>
-            {salaryLabel && <p className="mb-0 text-body-secondary">{salaryLabel}</p>}
+          <div className="sm:text-right flex flex-col gap-1 text-sm text-slate-500 dark:text-slate-400">
+            {job.jobType && (
+              <span className="text-xs font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">
+                {job.jobType}
+              </span>
+            )}
+            <div className="flex items-center gap-1.5 sm:justify-end">
+              <Calendar className="w-4 h-4" />
+              <span>{formatDate(job.postingDate)}</span>
+            </div>
           </div>
         </div>
-        {job.summary && <p className="mt-3 text-body-secondary">{job.summary}</p>}
+
+        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400 mb-3">
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-4 h-4" />
+            <span>{job.location}</span>
+          </div>
+          {salaryLabel && (
+            <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+              <DollarSign className="w-4 h-4" />
+              <span>{salaryLabel}</span>
+            </div>
+          )}
+        </div>
+
+        {job.summary && (
+          <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-3">{job.summary}</p>
+        )}
+
         {renderSkills(job.techSkills, 'Key technologies')}
         {renderSkills(job.domainSkills, 'Domain expertise')}
-        <div className="mt-4 d-flex flex-wrap gap-3 align-items-center">
+
+        <div className="mt-auto pt-4 flex flex-wrap gap-3 items-center">
           {job.jobUrl && (
-            <a className="btn btn-primary btn-lg" href={job.jobUrl} target="_blank" rel="noreferrer">
+            <a
+              className="btn-primary inline-flex items-center gap-2 text-sm"
+              href={job.jobUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
               View role
+              <ExternalLink className="w-4 h-4" />
             </a>
           )}
           {job.requirements && (
-            <span className="text-body-secondary small fst-italic">
-              {job.requirements.length > 160
-                ? `${job.requirements.slice(0, 157).trimEnd()}...`
-                : job.requirements}
+            <span className="text-slate-500 dark:text-slate-400 text-sm italic line-clamp-1 flex-1">
+              {job.requirements.length > 100 ? `${job.requirements.slice(0, 97).trimEnd()}...` : job.requirements}
             </span>
           )}
         </div>
