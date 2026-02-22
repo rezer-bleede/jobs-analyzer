@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
 import { CustomAnalyticsPage } from './pages/CustomAnalyticsPage'
 import { CompaniesPage } from './pages/CompaniesPage'
+import { CompanyDetailPage } from './pages/CompanyDetailPage'
 import { fetchJobs, type FetchJobsResult } from './services/jobsService'
 import type { Job, JobFilters } from './types/job'
 import type { JobsMetadata } from './types/metadata'
@@ -221,6 +222,17 @@ function AppContent() {
           path="/companies"
           element={
             <CompaniesPage
+              jobs={jobs}
+              isLoading={isLoading}
+              error={error}
+              metadata={metadata}
+            />
+          }
+        />
+        <Route
+          path="/companies/:companyName"
+          element={
+            <CompanyDetailPage
               jobs={jobs}
               isLoading={isLoading}
               error={error}

@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Building2, MapPin, Briefcase, Users, Clock, Search, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowLeft, Building2, MapPin, Briefcase, Users, Search, X } from 'lucide-react'
 import { DataFreshness } from '../components/DataFreshness'
 import type { Job } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
@@ -21,18 +21,12 @@ const formatSalary = (value: number, currency: string): string => {
   }
 }
 
-const formatDate = (value: string | null): string => {
-  if (!value) return '—'
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return '—'
-  return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
-  const [expanded, setExpanded] = useState(false)
-
   return (
-    <article className="section-card overflow-hidden">
+    <Link
+      to={`/companies/${encodeURIComponent(company.name)}`}
+      className="section-card overflow-hidden block no-underline cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 hover:border-violet-300 dark:hover:border-violet-700"
+    >
       <div className="p-5">
         <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
           <div className="flex-1">
@@ -85,73 +79,11 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={() => setExpanded(!expanded)}
-          className="text-sm text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1"
-        >
-          {expanded ? (
-            <>
-              <ChevronUp className="w-4 h-4" />
-              Show less
-            </>
-          ) : (
-            <>
-              <ChevronDown className="w-4 h-4" />
-              Show details
-            </>
-          )}
-        </button>
+        <span className="text-sm text-violet-600 dark:text-violet-400 hover:underline flex items-center gap-1">
+          View company details →
+        </span>
       </div>
-
-      {expanded && (
-        <div className="border-t border-slate-200 dark:border-slate-700 p-5 bg-slate-50 dark:bg-slate-800/50">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Job Titles</p>
-              <div className="flex flex-wrap gap-1">
-                {company.jobTitles.map(title => (
-                  <span key={title} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{title}</span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Locations</p>
-              <div className="flex flex-wrap gap-1">
-                {company.locations.slice(0, 4).map(loc => (
-                  <span key={loc} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{loc}</span>
-                ))}
-                {company.locations.length > 4 && (
-                  <span className="text-xs text-slate-500">+{company.locations.length - 4} more</span>
-                )}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Job Types</p>
-              <div className="flex flex-wrap gap-1">
-                {company.jobTypes.map(type => (
-                  <span key={type} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{type}</span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-1">Domain Skills</p>
-              <div className="flex flex-wrap gap-1">
-                {company.topDomainSkills.map(skill => (
-                  <span key={skill} className="text-xs bg-white dark:bg-slate-700 px-2 py-1 rounded text-slate-700 dark:text-slate-300">{skill}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-300">
-            <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
-              Latest posting: {formatDate(company.latestPostingDate)}
-            </span>
-          </div>
-        </div>
-      )}
-    </article>
+    </Link>
   )
 })
 
