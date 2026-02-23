@@ -1,4 +1,5 @@
 import type { Job } from '../types/job'
+import { normalizeCountry, extractCountryFromLocation } from '../utils/jobFilters'
 import { parseSkillList } from '../utils/skills'
 
 export interface JobsData {
@@ -55,9 +56,14 @@ const buildLocation = (raw: RawJob): { label: string; country?: string; state?: 
   const location = stringOrNull(raw.location)
   const city = stringOrNull(raw.city_inferred)
   const state = stringOrNull(raw.state_inferred)
-  const country = stringOrNull(raw.country_inferred)
+  const rawCountry = stringOrNull(raw.country_inferred)
 
-  const fromParts = [city, state, country].filter(Boolean).join(', ')
+  // Normalize country from explicit field, or extract from location string
+  const country = normalizeCountry(rawCountry)
+    ?? extractCountryFromLocation(location)
+    ?? null
+
+  const fromParts = [city, state, rawCountry ?? country].filter(Boolean).join(', ')
   const label = location || fromParts || 'Location to be confirmed'
   return {
     label,

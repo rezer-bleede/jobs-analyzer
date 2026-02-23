@@ -10,24 +10,111 @@ export const STANDARDIZED_COUNTRIES = [
 ] as const
 
 const COUNTRY_ALIASES: Record<string, string> = {
+  // UAE
   'uae': 'United Arab Emirates',
   'u.a.e': 'United Arab Emirates',
+  'u.a.e.': 'United Arab Emirates',
   'united arab emirates': 'United Arab Emirates',
   'dubai': 'United Arab Emirates',
   'abu dhabi': 'United Arab Emirates',
+  'sharjah': 'United Arab Emirates',
+  'ajman': 'United Arab Emirates',
+  'fujairah': 'United Arab Emirates',
+  'ras al khaimah': 'United Arab Emirates',
+  'ras al-khaimah': 'United Arab Emirates',
+  'umm al quwain': 'United Arab Emirates',
+  'umm al-quwain': 'United Arab Emirates',
+  // Saudi Arabia
   'saudi': 'Saudi Arabia',
   'saudi arabia': 'Saudi Arabia',
   'ksa': 'Saudi Arabia',
+  'kingdom of saudi arabia': 'Saudi Arabia',
+  // Qatar
   'qatar': 'Qatar',
+  'state of qatar': 'Qatar',
+  // Kuwait
   'kuwait': 'Kuwait',
+  'state of kuwait': 'Kuwait',
+  // Bahrain
   'bahrain': 'Bahrain',
+  'kingdom of bahrain': 'Bahrain',
+  // Oman
   'oman': 'Oman',
+  'sultanate of oman': 'Oman',
+  // Other Middle East / common in dataset
+  'egypt': 'Egypt',
+  'jordan': 'Jordan',
+  'lebanon': 'Lebanon',
+  'iraq': 'Iraq',
+  'iran': 'Iran',
+  'turkey': 'Turkey',
+  'türkiye': 'Turkey',
+  'pakistan': 'Pakistan',
+  'india': 'India',
+  'yemen': 'Yemen',
+  'syria': 'Syria',
+  'palestine': 'Palestine',
+  'israel': 'Israel',
+  'morocco': 'Morocco',
+  'tunisia': 'Tunisia',
+  'algeria': 'Algeria',
+  'libya': 'Libya',
+  'sudan': 'Sudan',
+  'united states': 'United States',
+  'usa': 'United States',
+  'united kingdom': 'United Kingdom',
+  'uk': 'United Kingdom',
+  'germany': 'Germany',
+  'france': 'France',
+  'canada': 'Canada',
+  'australia': 'Australia',
+  'singapore': 'Singapore',
+  'malaysia': 'Malaysia',
+  'philippines': 'Philippines',
+  'south africa': 'South Africa',
+  'nigeria': 'Nigeria',
+  'kenya': 'Kenya',
+  'ghana': 'Ghana',
 }
 
 export const normalizeCountry = (country: string | undefined): string | null => {
   if (!country) return null
-  const normalized = country.trim().toLowerCase()
-  return COUNTRY_ALIASES[normalized] ?? null
+  const trimmed = country.trim()
+  if (!trimmed) return null
+  const lower = trimmed.toLowerCase()
+  return COUNTRY_ALIASES[lower] ?? trimmed
+}
+
+/**
+ * Try to extract a country name from a full location string like
+ * "Dubai, Dubai, United Arab Emirates" by taking the last comma-separated
+ * segment and normalizing it.
+ */
+export const extractCountryFromLocation = (location: string | undefined | null): string | null => {
+  if (!location) return null
+  const parts = location.split(',').map((p) => p.trim()).filter(Boolean)
+  if (parts.length === 0) return null
+
+  // Try last segment first (most likely to be country)
+  const lastPart = parts[parts.length - 1]
+  const normalized = normalizeCountry(lastPart)
+  if (normalized && COUNTRY_ALIASES[lastPart.toLowerCase()]) return normalized
+
+  // Try second-to-last if last segment didn't match a known alias
+  if (parts.length >= 2) {
+    const secondLast = parts[parts.length - 2]
+    const normalized2 = normalizeCountry(secondLast)
+    if (normalized2 && COUNTRY_ALIASES[secondLast.toLowerCase()]) return normalized2
+  }
+
+  // If last segment looks like a country (not a city/state — heuristic:
+  // known alias map didn't match but the full location has 3+ parts,
+  // last part is likely still the country)
+  if (parts.length >= 2) {
+    return normalizeCountry(lastPart)
+  }
+
+  return null
 }
 
 export const DATE_POSTED_OPTIONS = [

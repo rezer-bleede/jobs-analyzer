@@ -131,7 +131,7 @@ function AppContent() {
       total: filteredJobs.length,
       remote: filteredJobs.filter((job) => job.isRemote === true).length,
       companies: new Set(filteredJobs.map((job) => job.company)).size,
-      countries: new Set(filteredJobs.map((job) => job.country ?? job.location)).size,
+      countries: new Set(filteredJobs.map((job) => job.country).filter(Boolean)).size,
     }),
     [filteredJobs],
   )
@@ -141,7 +141,7 @@ function AppContent() {
       total: jobs.length,
       remote: jobs.filter((job) => job.isRemote === true).length,
       companies: new Set(jobs.map((job) => job.company)).size,
-      countries: new Set(jobs.map((job) => job.country ?? job.location)).size,
+      countries: new Set(jobs.map((job) => job.country).filter(Boolean)).size,
     }),
     [jobs],
   )

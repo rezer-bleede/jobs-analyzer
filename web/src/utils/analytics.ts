@@ -85,7 +85,7 @@ export const buildLocationActivity = (jobs: Job[], limit = 5): LocationActivity[
   const counts = new Map<string, number>()
 
   jobs.forEach((job) => {
-    const label = job.country ?? job.location
+    const label = job.country
     if (!label) {
       return
     }
@@ -251,7 +251,7 @@ export const buildLocationRemoteStats = (jobs: Job[], limit = 8): LocationRemote
   const stats = new Map<string, { total: number; remote: number; onsite: number; unknown: number }>()
 
   jobs.forEach((job) => {
-    const label = job.country ?? job.location
+    const label = job.country
     if (!label) {
       return
     }
