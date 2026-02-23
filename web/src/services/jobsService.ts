@@ -59,7 +59,7 @@ const buildLocation = (raw: RawJob): { label: string; country?: string; state?: 
   const rawCountry = stringOrNull(raw.country_inferred)
 
   // Normalize country from explicit field, or extract from location string
-  const country = normalizeCountry(rawCountry)
+  const country = normalizeCountry(rawCountry ?? undefined)
     ?? extractCountryFromLocation(location)
     ?? null
 

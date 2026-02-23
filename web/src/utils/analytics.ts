@@ -225,7 +225,7 @@ export const buildIndustryBreakdown = (jobs: Job[], limit = 8): IndustryBreakdow
   const buckets = new Map<string, { total: number; remote: number }>()
 
   jobs.forEach((job) => {
-    const label = normalizeCountry(job.country) ?? job.country
+    const label = cleanIndustryLabel(job)
     if (!label) {
       return
     }
