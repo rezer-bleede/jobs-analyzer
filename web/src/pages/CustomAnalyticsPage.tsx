@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Plus, Trash2, TrendingUp, PieChart, Table } from 'lucide-react'
 import type { Job } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
+import { normalizeCountry } from '../utils/jobFilters'
 import { BarChart } from '../components/charts/BarChart'
 import { DonutChart } from '../components/charts/DonutChart'
 
@@ -71,7 +72,10 @@ const normalizeLabel = (value: unknown): string | null => {
 const extractValues = (job: Job, field: GroupingField): string[] => {
   switch (field) {
     case 'company': return job.company ? [job.company] : []
-    case 'country': return job.country ? [job.country] : []
+    case 'country': {
+      const normalized = normalizeCountry(job.country)
+      return normalized ? [normalized] : []
+    }
     case 'location': return job.location ? [job.location] : []
     case 'jobType': return job.jobType ? [job.jobType] : []
     case 'industry': return job.industry ? [job.industry] : []

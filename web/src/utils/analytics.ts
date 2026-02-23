@@ -1,4 +1,5 @@
 import type { Job } from '../types/job'
+import { normalizeCountry } from './jobFilters'
 
 export interface CompanyActivity {
   company: string
@@ -85,7 +86,7 @@ export const buildLocationActivity = (jobs: Job[], limit = 5): LocationActivity[
   const counts = new Map<string, number>()
 
   jobs.forEach((job) => {
-    const label = job.country
+    const label = normalizeCountry(job.country) ?? job.country
     if (!label) {
       return
     }
@@ -224,7 +225,7 @@ export const buildIndustryBreakdown = (jobs: Job[], limit = 8): IndustryBreakdow
   const buckets = new Map<string, { total: number; remote: number }>()
 
   jobs.forEach((job) => {
-    const label = cleanIndustryLabel(job)
+    const label = normalizeCountry(job.country) ?? job.country
     if (!label) {
       return
     }
@@ -251,7 +252,7 @@ export const buildLocationRemoteStats = (jobs: Job[], limit = 8): LocationRemote
   const stats = new Map<string, { total: number; remote: number; onsite: number; unknown: number }>()
 
   jobs.forEach((job) => {
-    const label = job.country
+    const label = normalizeCountry(job.country) ?? job.country
     if (!label) {
       return
     }

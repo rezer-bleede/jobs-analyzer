@@ -17,6 +17,7 @@ import {
   deriveLocationOptions,
   deriveCountryOptions,
   deriveSearchOptions,
+  normalizeCountry,
 } from './utils/jobFilters'
 import { buildSkillFrequency } from './utils/skills'
 import {
@@ -131,7 +132,7 @@ function AppContent() {
       total: filteredJobs.length,
       remote: filteredJobs.filter((job) => job.isRemote === true).length,
       companies: new Set(filteredJobs.map((job) => job.company)).size,
-      countries: new Set(filteredJobs.map((job) => job.country).filter(Boolean)).size,
+      countries: new Set(filteredJobs.map((job) => normalizeCountry(job.country)).filter(Boolean)).size,
     }),
     [filteredJobs],
   )
@@ -141,7 +142,7 @@ function AppContent() {
       total: jobs.length,
       remote: jobs.filter((job) => job.isRemote === true).length,
       companies: new Set(jobs.map((job) => job.company)).size,
-      countries: new Set(jobs.map((job) => job.country).filter(Boolean)).size,
+      countries: new Set(jobs.map((job) => normalizeCountry(job.country)).filter(Boolean)).size,
     }),
     [jobs],
   )

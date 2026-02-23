@@ -1,4 +1,5 @@
 import type { Job } from '../types/job'
+import { normalizeCountry } from './jobFilters'
 
 export interface CompanyInfo {
   name: string
@@ -77,7 +78,10 @@ export const buildCompanies = (jobs: Job[]): CompanyInfo[] => {
     entry.jobs.push(job)
 
     if (job.location) entry.locations.add(job.location)
-    if (job.country) entry.countries.add(job.country)
+    if (job.country) {
+      const normalized = normalizeCountry(job.country)
+      if (normalized) entry.countries.add(normalized)
+    }
     if (job.title) entry.jobTitles.add(job.title)
     if (job.industry) entry.industries.add(job.industry)
     if (job.jobType) entry.jobTypes.add(job.jobType)
