@@ -10,8 +10,10 @@ export const STANDARDIZED_COUNTRIES = [
 ] as const
 
 const COUNTRY_ALIASES: Record<string, string> = {
-  // UAE
+  // UAE — names, abbreviations, ISO code, cities, emirates
+  'ae': 'United Arab Emirates',
   'uae': 'United Arab Emirates',
+  'uaen': 'United Arab Emirates',
   'u.a.e': 'United Arab Emirates',
   'u.a.e.': 'United Arab Emirates',
   'united arab emirates': 'United Arab Emirates',
@@ -25,93 +27,163 @@ const COUNTRY_ALIASES: Record<string, string> = {
   'umm al quwain': 'United Arab Emirates',
   'umm al-quwain': 'United Arab Emirates',
   // Saudi Arabia
+  'sa': 'Saudi Arabia',
   'saudi': 'Saudi Arabia',
   'saudi arabia': 'Saudi Arabia',
   'ksa': 'Saudi Arabia',
   'kingdom of saudi arabia': 'Saudi Arabia',
   // Qatar
+  'qa': 'Qatar',
   'qatar': 'Qatar',
   'state of qatar': 'Qatar',
   // Kuwait
+  'kw': 'Kuwait',
   'kuwait': 'Kuwait',
   'state of kuwait': 'Kuwait',
   // Bahrain
+  'bh': 'Bahrain',
   'bahrain': 'Bahrain',
   'kingdom of bahrain': 'Bahrain',
   // Oman
+  'om': 'Oman',
   'oman': 'Oman',
   'sultanate of oman': 'Oman',
-  // Other Middle East / common in dataset
+  // Other Middle East
+  'eg': 'Egypt',
   'egypt': 'Egypt',
+  'jo': 'Jordan',
   'jordan': 'Jordan',
+  'lb': 'Lebanon',
   'lebanon': 'Lebanon',
+  'iq': 'Iraq',
   'iraq': 'Iraq',
+  'ir': 'Iran',
   'iran': 'Iran',
+  'tr': 'Turkey',
   'turkey': 'Turkey',
   'türkiye': 'Turkey',
+  'pk': 'Pakistan',
   'pakistan': 'Pakistan',
+  'in': 'India',
   'india': 'India',
+  'ye': 'Yemen',
   'yemen': 'Yemen',
+  'sy': 'Syria',
   'syria': 'Syria',
+  'ps': 'Palestine',
   'palestine': 'Palestine',
+  'il': 'Israel',
   'israel': 'Israel',
+  'ma': 'Morocco',
   'morocco': 'Morocco',
+  'tn': 'Tunisia',
   'tunisia': 'Tunisia',
+  'dz': 'Algeria',
   'algeria': 'Algeria',
+  'ly': 'Libya',
   'libya': 'Libya',
+  'sd': 'Sudan',
   'sudan': 'Sudan',
-  'united states': 'United States',
+  // International
+  'us': 'United States',
   'usa': 'United States',
-  'united kingdom': 'United Kingdom',
+  'united states': 'United States',
+  'gb': 'United Kingdom',
   'uk': 'United Kingdom',
+  'united kingdom': 'United Kingdom',
+  'de': 'Germany',
   'germany': 'Germany',
+  'fr': 'France',
   'france': 'France',
+  'ca': 'Canada',
   'canada': 'Canada',
+  'au': 'Australia',
   'australia': 'Australia',
+  'sg': 'Singapore',
   'singapore': 'Singapore',
+  'my': 'Malaysia',
   'malaysia': 'Malaysia',
+  'ph': 'Philippines',
   'philippines': 'Philippines',
+  'za': 'South Africa',
   'south africa': 'South Africa',
+  'ng': 'Nigeria',
   'nigeria': 'Nigeria',
+  'ke': 'Kenya',
   'kenya': 'Kenya',
+  'gh': 'Ghana',
   'ghana': 'Ghana',
+  'ch': 'Switzerland',
+  'switzerland': 'Switzerland',
+  'pl': 'Poland',
+  'poland': 'Poland',
+  'es': 'Spain',
+  'spain': 'Spain',
+  'pt': 'Portugal',
+  'portugal': 'Portugal',
 }
 
-export const normalizeCountry = (country: string | undefined): string | null => {
+/** Non-country strings that appear in country fields and should be ignored. */
+const COUNTRY_JUNK = new Set([
+  'none', 'n/a', 'na', 'null', 'undefined', '-', 'remote', 'global',
+  'worldwide', 'international', 'middle east', 'gcc', 'mena', 'apac',
+  'emea', 'latam', 'europe', 'asia', 'africa', 'americas',
+])
+
+/**
+ * Resolve a raw country string to a standardized name.
+ * - Matches against known aliases and ISO-2 codes
+ * - Rejects known junk/region strings (returns null)
+ * - For multi-country comma strings, returns the first recognized country
+ * - Returns trimmed input for unrecognised but plausible single-country values
+ */
+export const normalizeCountry = (country: string | undefined | null): string | null => {
   if (!country) return null
   const trimmed = country.trim()
   if (!trimmed) return null
   const lower = trimmed.toLowerCase()
-  return COUNTRY_ALIASES[lower] ?? trimmed
+
+  // Direct alias hit
+  if (COUNTRY_ALIASES[lower]) return COUNTRY_ALIASES[lower]
+
+  // Known junk — drop
+  if (COUNTRY_JUNK.has(lower)) return null
+
+  // Multi-value string (e.g. "UK, UAE, Poland") — scan each part for first alias hit
+  if (trimmed.includes(',')) {
+    for (const part of trimmed.split(',').map((p) => p.trim())) {
+      const alias = COUNTRY_ALIASES[part.toLowerCase()]
+      if (alias) return alias
+    }
+    return null
+  }
+
+  // Single unrecognised value — keep as-is (e.g. "Switzerland")
+  return trimmed
 }
 
 /**
- * Try to extract a country name from a full location string like
- * "Dubai, Dubai, United Arab Emirates" by taking the last comma-separated
- * segment and normalizing it.
+ * Extract a standardized country from a full location string such as
+ * "Dubai, Dubai, United Arab Emirates" by scanning segments right-to-left
+ * for a known alias. Only returns alias-matched values (no free-form pass-through)
+ * to avoid promoting city/state names to countries.
  */
 export const extractCountryFromLocation = (location: string | undefined | null): string | null => {
   if (!location) return null
   const parts = location.split(',').map((p) => p.trim()).filter(Boolean)
   if (parts.length === 0) return null
 
-  // Try last segment first (most likely to be country)
-  const lastPart = parts[parts.length - 1]
-  const normalized = normalizeCountry(lastPart)
-  if (normalized && COUNTRY_ALIASES[lastPart.toLowerCase()]) return normalized
-
-  // Try second-to-last if last segment didn't match a known alias
-  if (parts.length >= 2) {
-    const secondLast = parts[parts.length - 2]
-    const normalized2 = normalizeCountry(secondLast)
-    if (normalized2 && COUNTRY_ALIASES[secondLast.toLowerCase()]) return normalized2
+  // Scan right-to-left — rightmost segment is most likely the country
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const alias = COUNTRY_ALIASES[parts[i].toLowerCase()]
+    if (alias) return alias
   }
 
-  // If last segment looks like a country (not a city/state — heuristic:
-  // known alias map didn't match but the full location has 3+ parts,
-  // last part is likely still the country)
+  // No alias match found — if there are 2+ segments, the last part may still
+  // be a valid country not in our alias map (e.g. an unusual country).
+  // Keep it only if normalizeCountry doesn't classify it as junk.
   if (parts.length >= 2) {
-    return normalizeCountry(lastPart)
+    return normalizeCountry(parts[parts.length - 1])
   }
 
   return null
