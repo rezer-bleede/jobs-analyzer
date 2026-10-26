@@ -60,7 +60,7 @@ try {
 
   // Update totalJobs to match filtered count
   output.metadata.totalJobs = activeJobs.length
-  output.metadata.lastUpdated = new Date().toISOString()
+  output.metadata.lastUpdated ??= new Date().toISOString()
 
   writeFileSync(OUT_PATH, JSON.stringify(output))
   const sizeMB = (Buffer.byteLength(JSON.stringify(output)) / 1_048_576).toFixed(1)

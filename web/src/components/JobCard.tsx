@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { Link } from 'react-router-dom'
 import { MapPin, Calendar, DollarSign, ExternalLink } from 'lucide-react'
 import type { Job } from '../types/job'
 
@@ -63,7 +64,7 @@ const JobCardContent = ({ job }: { job: Job }) => {
                 {remoteLabel}
               </span>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 line-clamp-2">{job.title}</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 line-clamp-2"><Link to={`/jobs/${encodeURIComponent(job.id)}`} className="job-title-link">{job.title}</Link></h3>
             <p className="text-slate-600 dark:text-slate-300 font-medium">{job.company}</p>
           </div>
           <div className="sm:text-right flex flex-col gap-1 text-sm text-slate-500 dark:text-slate-400">
@@ -100,6 +101,7 @@ const JobCardContent = ({ job }: { job: Job }) => {
         <SkillBadges skills={job.domainSkills} label="Domain expertise" />
 
         <div className="mt-auto pt-4 flex flex-wrap gap-3 items-center">
+          <Link className="btn-secondary inline-flex items-center gap-2 text-sm" to={`/jobs/${encodeURIComponent(job.id)}`}>Role details</Link>
           {job.jobUrl && (
             <a
               className="btn-primary inline-flex items-center gap-2 text-sm"

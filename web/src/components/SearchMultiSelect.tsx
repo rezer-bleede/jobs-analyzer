@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { X } from 'lucide-react'
 
@@ -24,6 +24,12 @@ export const SearchMultiSelect = ({
   const inputId = useId()
   const listId = `${inputId}-datalist`
   const [inputValue, setInputValue] = useState('')
+  const [suggestionQuery, setSuggestionQuery] = useState('')
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSuggestionQuery(inputValue), 120)
+    return () => window.clearTimeout(timer)
+  }, [inputValue])
 
   const normalisedSelected = useMemo(() => selected.map(normalise), [selected])
 
@@ -79,10 +85,10 @@ export const SearchMultiSelect = ({
   const suggestions = useMemo(
     () =>
       options
-        .filter((option) => option.toLowerCase().includes(inputValue.trim().toLowerCase()))
+        .filter((option) => option.toLowerCase().includes(suggestionQuery.trim().toLowerCase()))
         .filter((option) => !normalisedSelected.includes(normalise(option)))
         .slice(0, 10),
-    [inputValue, normalisedSelected, options],
+    [suggestionQuery, normalisedSelected, options],
   )
 
   return (
@@ -91,7 +97,7 @@ export const SearchMultiSelect = ({
         {label}
       </label>
       <div className="relative">
-        <div className="flex flex-wrap gap-2 items-center px-3 py-2 min-h-[46px] w-full border border-[hsl(var(--border))] rounded-[var(--radius-lg)] bg-[hsl(var(--background))] transition-all duration-200 focus-within:border-[hsl(var(--primary))] focus-within:shadow-[0_0_0_3px_rgba(124,58,237,0.15)]">
+        <div className="flex flex-wrap gap-2 items-center px-3 py-2 min-h-[46px] w-full border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 transition-all duration-200 focus-within:border-violet-600">
           {selected.map((term) => (
             <span
               key={term}

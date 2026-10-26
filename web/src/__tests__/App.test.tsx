@@ -35,6 +35,7 @@ const mockJobsPayload = [
 
 describe('App', () => {
   beforeEach(() => {
+    localStorage.clear()
     const now = new Date()
     mockJobsPayload[0].date_posted = now.toISOString()
     mockJobsPayload[1].date_posted = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -77,6 +78,36 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument())
     expect(screen.getByText('Data Platform Engineer')).toBeInTheDocument()
     expect(screen.getByText(/showing 2 roles/i)).toBeInTheDocument()
+  })
+
+  it('paginates job cards so only one page is rendered at a time', async () => {
+    const jobs = Array.from({ length: 45 }, (_, index) => ({
+      ...mockJobsPayload[0],
+      job_hash: `job-${index}`,
+      title: `Data Engineer ${index + 1}`,
+    }))
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => jobs,
+    } as Response)
+
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
+
+    expect(await screen.findByText('Data Engineer 1')).toBeInTheDocument()
+    expect(screen.getByText('Data Engineer 20')).toBeInTheDocument()
+    expect(screen.queryByText('Data Engineer 21')).not.toBeInTheDocument()
+    expect(screen.getByText(/showing 1–20 of 45 roles/i)).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(await screen.findByText('Data Engineer 21')).toBeInTheDocument()
+    expect(screen.getByText('Data Engineer 40')).toBeInTheDocument()
+    expect(screen.queryByText('Data Engineer 1')).not.toBeInTheDocument()
+    expect(screen.getByText('Page 2 of 3')).toBeInTheDocument()
   })
 
   it('filters jobs based on the search input', async () => {

@@ -214,4 +214,16 @@ describe('fetchJobs', () => {
       company: 'Oasis Analytics',
     })
   })
+
+  it('uses the same-origin Pages jobs endpoint by default', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [],
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await fetchJobs()
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/jobs')
+  })
 })

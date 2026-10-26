@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, BarChart3 } from 'lucide-react'
 import { FilterBar } from '../components/FilterBar'
@@ -8,6 +9,8 @@ import { DataFreshness } from '../components/DataFreshness'
 import type { Job, JobFilters } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
 import type { SkillFrequency } from '../utils/skills'
+
+const JOBS_PER_PAGE = 20
 
 interface HomePageProps {
   jobs: Job[]
@@ -46,17 +49,31 @@ export const HomePage = ({
   metadata,
   onFiltersChange,
   onResetFilters,
-}: HomePageProps) => (
+}: HomePageProps) => {
+  const [page, setPage] = useState(1)
+  const pageCount = Math.max(1, Math.ceil(filteredJobs.length / JOBS_PER_PAGE))
+  const visibleJobs = filteredJobs.slice((page - 1) * JOBS_PER_PAGE, page * JOBS_PER_PAGE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [filteredJobs])
+
+  const changePage = (nextPage: number) => {
+    setPage(nextPage)
+    document.getElementById('job-results')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' })
+  }
+
+  return (
   <main className="py-6 lg:py-10">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <header className="mb-8">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-center lg:justify-between">
           <div className="flex-1">
             <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">
-              Middle East data engineering roles
+              Data & AI roles in Saudi Arabia
             </h1>
             <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
-              A curated feed of vetted opportunities updated continuously. Apply filters to explore{' '}
+              A focused feed of data, engineering and AI opportunities. Apply filters to explore{' '}
               <span className="font-semibold text-violet-600 dark:text-violet-400">{jobs.length.toLocaleString()}</span>{' '}
               listings and find the{' '}
               <span className="font-semibold text-cyan-600 dark:text-cyan-400">{filteredJobs.length.toLocaleString()}</span>{' '}
@@ -126,9 +143,13 @@ export const HomePage = ({
         className="flex flex-wrap justify-between items-center gap-3 mb-4"
       >
         <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-          {isLoading ? 'Loading roles...' : `Showing ${filteredJobs.length.toLocaleString()} roles`}
+          {isLoading
+            ? 'Loading roles...'
+            : filteredJobs.length <= JOBS_PER_PAGE
+              ? `Showing ${filteredJobs.length.toLocaleString()} ${filteredJobs.length === 1 ? 'role' : 'roles'}`
+              : `Showing ${((page - 1) * JOBS_PER_PAGE + 1).toLocaleString()}–${Math.min(page * JOBS_PER_PAGE, filteredJobs.length).toLocaleString()} of ${filteredJobs.length.toLocaleString()} roles`}
         </h2>
-        {!isLoading && jobs.length !== filteredJobs.length && (
+          {!isLoading && jobs.length !== filteredJobs.length && (
           <span className="badge badge-secondary">
             Filtered from {jobs.length.toLocaleString()} total
           </span>
@@ -151,10 +172,35 @@ export const HomePage = ({
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        {filteredJobs.map((job) => (
+        {visibleJobs.map((job) => (
           <JobCard key={job.id} job={job} />
         ))}
       </div>
+
+      {!isLoading && pageCount > 1 && (
+        <nav aria-label="Job result pages" className="flex items-center justify-center gap-4 mt-8">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => changePage(page - 1)}
+            disabled={page === 1}
+          >
+            Previous
+          </button>
+          <span className="text-sm text-slate-600 dark:text-slate-400" aria-live="polite">
+            Page {page} of {pageCount}
+          </span>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => changePage(page + 1)}
+            disabled={page === pageCount}
+          >
+            Next
+          </button>
+        </nav>
+      )}
     </div>
   </main>
-)
+  )
+}

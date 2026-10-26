@@ -14,6 +14,29 @@ export interface JobsData {
 }
 
 type RawJob = Record<string, unknown>
+const CACHE_FIELDS = [
+  'job_hash', 'id', 'title', 'job_title_inferred', 'company', 'company_name_inferred', 'location',
+  'country_inferred', 'state_inferred', 'city_inferred', 'job_type', 'job_type_inferred', 'date_posted',
+  'min_amount', 'max_amount', 'currency', 'is_remote', 'site', 'job_url', 'job_url_direct',
+  'desired_tech_skills_inferred', 'tech_skills', 'desired_soft_skills_inferred', 'soft_skills',
+  'desired_domain_skills_inferred', 'domain_skills', 'company_industry', 'company_industry_inferred',
+  'domains_inferred', 'job_description_inferred', 'job_requirements_inferred',
+  'job_responsibilities_inferred', 'job_benefits_inferred',
+]
+
+const compactPayload = (payload: unknown): unknown => {
+  const compactRows = (rows: unknown[]) => rows.map((row) => {
+    if (!row || typeof row !== 'object') return row
+    const record = row as RawJob
+    return Object.fromEntries(CACHE_FIELDS.filter((key) => key in record).map((key) => [key, record[key]]))
+  })
+  if (Array.isArray(payload)) return compactRows(payload)
+  if (payload && typeof payload === 'object' && 'jobs' in payload) {
+    const wrapped = payload as { jobs: unknown[]; metadata?: unknown }
+    return { metadata: wrapped.metadata, jobs: compactRows(wrapped.jobs) }
+  }
+  return payload
+}
 
 const stringOrNull = (value: unknown): string | null => {
   if (typeof value === 'string') {
@@ -121,7 +144,7 @@ const normaliseJob = (raw: RawJob): Job => {
     benefits: stringOrNull(raw.job_benefits_inferred),
     industry,
     domains,
-    raw,
+    raw: Object.fromEntries(CACHE_FIELDS.filter((key) => key in raw).map((key) => [key, raw[key]])),
   }
 }
 
@@ -214,11 +237,20 @@ const getCachedData = (): CachedData | null => {
 }
 
 const setCachedData = (payload: unknown): void => {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(payload))
-    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString())
-  } catch {
-    // Storage full or unavailable, skip caching
+  const compacted = compactPayload(payload)
+  const persist = () => {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(compacted))
+      localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString())
+    } catch {
+      // Storage full or unavailable, skip caching
+    }
+  }
+  const requestIdle = (window as Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number }).requestIdleCallback
+  if (requestIdle) {
+    requestIdle(persist, { timeout: 1500 })
+  } else {
+    setTimeout(persist, 0)
   }
 }
 
@@ -227,8 +259,8 @@ const isCacheValid = (timestamp: number): boolean => {
 }
 
 export const fetchJobs = async (
-  dataUrl = import.meta.env.VITE_JOBS_DATA_URL,
-  fallbackUrl = '/jobs.json',
+  dataUrl = import.meta.env.VITE_JOBS_DATA_URL || `${import.meta.env.BASE_URL}api/jobs`,
+  fallbackUrl = `${import.meta.env.BASE_URL}jobs.json`,
 ): Promise<FetchJobsResult> => {
   const cached = getCachedData()
   if (cached && isCacheValid(cached.timestamp)) {

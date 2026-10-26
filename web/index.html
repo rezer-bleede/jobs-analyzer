@@ -2,43 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YXBPPF4R0E"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-YXBPPF4R0E');
+      window.addEventListener('load', () => setTimeout(() => {
+        const script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-YXBPPF4R0E';
+        script.async = true;
+        document.head.appendChild(script);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){ window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', 'G-YXBPPF4R0E');
+      }, 2500), { once: true });
     </script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/logo-icon.svg" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <link rel="apple-touch-icon" href="%BASE_URL%logo-icon.svg" />
+    <link rel="manifest" href="%BASE_URL%manifest.json" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#3b82f6" />
-    <title>Jobs Analyzer | Middle East Data Engineering Opportunities</title>
+    <meta name="theme-color" content="#3d6c49" />
+    <title>Jobs Analyzer | Data & AI roles in Saudi Arabia</title>
     <meta
       name="description"
-      content="Discover data engineering opportunities across the Middle East. Browse 45+ jobs from top companies in Saudi Arabia, UAE, Qatar, and more."
+      content="Explore data engineering, AI, and analytics opportunities in Saudi Arabia."
     />
     
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Jobs Analyzer | Middle East Data Engineering Opportunities" />
-    <meta property="og:description" content="Discover data engineering opportunities across the Middle East. Browse 45+ jobs from top companies in Saudi Arabia, UAE, Qatar, and more." />
-    <meta property="og:image" content="/og-image.svg" />
-    <meta property="og:url" content="https://jobs-analyzer.github.io/" />
+    <meta property="og:title" content="Jobs Analyzer | Data & AI roles in Saudi Arabia" />
+    <meta property="og:description" content="Explore data engineering, AI, and analytics opportunities in Saudi Arabia." />
+    <meta property="og:image" content="%BASE_URL%og-image.svg" />
+    <meta property="og:url" content="https://jobs-analyzer.pages.dev/" />
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Jobs Analyzer | Middle East Data Engineering Opportunities" />
-    <meta name="twitter:description" content="Discover data engineering opportunities across the Middle East. Browse 45+ jobs from top companies." />
-    <meta name="twitter:image" content="/og-image.svg" />
+    <meta name="twitter:title" content="Jobs Analyzer | Data & AI roles in Saudi Arabia" />
+    <meta name="twitter:description" content="Explore data engineering, AI, and analytics opportunities in Saudi Arabia." />
+    <meta name="twitter:image" content="%BASE_URL%og-image.svg" />
     
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
   </head>
   <body>
     <div id="root"></div>

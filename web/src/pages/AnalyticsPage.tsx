@@ -11,12 +11,13 @@ import type { SkillFrequency } from '../utils/skills'
 import type {
   CompanyActivity,
   IndustryBreakdown,
-  LocationActivity,
   LocationRemoteStat,
   RemoteSplitSegment,
   SalaryBenchmark,
   WeeklyTrendPoint,
 } from '../utils/analytics'
+
+const refreshedDateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
 interface AnalyticsPageProps {
   jobs: Job[]
@@ -27,7 +28,6 @@ interface AnalyticsPageProps {
     countries: number
   }
   companyActivity: CompanyActivity[]
-  locationActivity: LocationActivity[]
   locationRemoteStats: LocationRemoteStat[]
   industryBreakdown: IndustryBreakdown[]
   salaryBenchmarks: SalaryBenchmark[]
@@ -95,7 +95,7 @@ export const AnalyticsPage = ({
             </p>
           </div>
           <div className="lg:text-right text-sm text-slate-500 dark:text-slate-400 flex flex-col lg:items-end gap-2">
-            <span>Last refreshed {isLoading ? '...' : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date())}</span>
+            <span>Last refreshed {isLoading ? '...' : metadata?.lastUpdated ? refreshedDateFormatter.format(new Date(metadata.lastUpdated)) : 'unknown'}</span>
             <DataFreshness metadata={metadata} isLoading={isLoading} />
           </div>
         </div>

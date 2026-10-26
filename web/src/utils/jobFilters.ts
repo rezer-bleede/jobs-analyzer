@@ -211,12 +211,18 @@ export const defaultFilters: JobFilters = {
   countries: [],
 }
 
-const matchesSearch = (job: Job, terms: string[]): boolean => {
+export const buildJobSearchIndex = (jobs: Job[]): WeakMap<Job, string> => {
+  const index = new WeakMap<Job, string>()
+  jobs.forEach((job) => index.set(job, [job.title, job.company, job.location, job.jobType ?? '', job.techSkills.join(' '), job.softSkills.join(' '), job.domainSkills.join(' '), job.summary ?? ''].join(' ').toLowerCase()))
+  return index
+}
+
+const matchesSearch = (job: Job, terms: string[], searchIndex?: WeakMap<Job, string>): boolean => {
   if (!terms.length) {
     return true
   }
 
-  const haystack = [
+  const haystack = searchIndex?.get(job) ?? [
     job.title,
     job.company,
     job.location,
@@ -281,10 +287,10 @@ const matchesDatePosted = (job: Job, dateFilter: string): boolean => {
   return postingDate >= windowStart
 }
 
-export const applyFilters = (jobs: Job[], filters: JobFilters): Job[] => {
+export const applyFilters = (jobs: Job[], filters: JobFilters, searchIndex?: WeakMap<Job, string>): Job[] => {
   return jobs.filter(
     (job) =>
-      matchesSearch(job, filters.searchTerms) &&
+      matchesSearch(job, filters.searchTerms, searchIndex) &&
       matchesLocation(job, filters.location) &&
       matchesCountries(job, filters.countries) &&
       matchesDatePosted(job, filters.datePosted),

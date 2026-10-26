@@ -54,7 +54,7 @@ describe('App integration', () => {
     })
 
     expect(screen.getByText('Insight Labs')).toBeInTheDocument()
-    expect(screen.getByText('Showing 1 roles')).toBeInTheDocument()
+    expect(screen.getByText('Showing 1 role')).toBeInTheDocument()
     expect(screen.getAllByText('Doha, Qatar')[0]).toBeInTheDocument()
   })
 

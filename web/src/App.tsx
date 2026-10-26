@@ -1,18 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { BrowserRouter, Link, NavLink, Route, Routes } from 'react-router-dom'
 import './App.css'
 import { ThemeToggle } from './components/ThemeToggle'
 import { HomePage } from './pages/HomePage'
-import { AnalyticsPage } from './pages/AnalyticsPage'
-import { CustomAnalyticsPage } from './pages/CustomAnalyticsPage'
-import { CompaniesPage } from './pages/CompaniesPage'
-import { CompanyDetailPage } from './pages/CompanyDetailPage'
 import { fetchJobs, type FetchJobsResult } from './services/jobsService'
 import type { Job, JobFilters } from './types/job'
 import type { JobsMetadata } from './types/metadata'
 import {
   DATE_POSTED_OPTIONS,
   applyFilters,
+  buildJobSearchIndex,
   defaultFilters,
   deriveLocationOptions,
   deriveCountryOptions,
@@ -20,17 +17,13 @@ import {
   normalizeCountry,
 } from './utils/jobFilters'
 import { buildSkillFrequency } from './utils/skills'
-import {
-  buildCompanyActivity,
-  buildIndustryBreakdown,
-  buildLocationActivity,
-  buildLocationRemoteStats,
-  buildPostingTrends,
-  buildRemoteSplit,
-  buildSalaryBenchmarks,
-} from './utils/analytics'
 
-import React from 'react'
+const CustomAnalyticsPage = lazy(() => import('./pages/CustomAnalyticsPage').then((module) => ({ default: module.CustomAnalyticsPage })))
+const AnalyticsRoute = lazy(() => import('./pages/AnalyticsRoute').then((module) => ({ default: module.AnalyticsRoute })))
+const CompaniesPage = lazy(() => import('./pages/CompaniesPage').then((module) => ({ default: module.CompaniesPage })))
+const CompanyDetailPage = lazy(() => import('./pages/CompanyDetailPage').then((module) => ({ default: module.CompanyDetailPage })))
+const JobDetailPage = lazy(() => import('./pages/JobDetailPage').then((module) => ({ default: module.JobDetailPage })))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((module) => ({ default: module.NotFoundPage })))
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -113,20 +106,12 @@ function AppContent() {
     }
   }, [])
 
-  const filteredJobs = useMemo(() => applyFilters(jobs, filters), [jobs, filters])
+  const searchIndex = useMemo(() => buildJobSearchIndex(jobs), [jobs])
+  const filteredJobs = useMemo(() => applyFilters(jobs, filters, searchIndex), [jobs, filters, searchIndex])
   const locationOptions = useMemo(() => deriveLocationOptions(jobs), [jobs])
   const countryOptions = useMemo(() => deriveCountryOptions(jobs), [jobs])
   const searchOptions = useMemo(() => deriveSearchOptions(jobs), [jobs])
   const filteredSkillFrequency = useMemo(() => buildSkillFrequency(filteredJobs), [filteredJobs])
-  const overallSkillFrequency = useMemo(() => buildSkillFrequency(jobs), [jobs])
-  const companyActivity = useMemo(() => buildCompanyActivity(jobs), [jobs])
-  const locationActivity = useMemo(() => buildLocationActivity(jobs, 8), [jobs])
-  const postingTrends = useMemo(() => buildPostingTrends(jobs, 12), [jobs])
-  const remoteSplit = useMemo(() => buildRemoteSplit(jobs), [jobs])
-  const salaryBenchmarks = useMemo(() => buildSalaryBenchmarks(jobs), [jobs])
-  const industryBreakdown = useMemo(() => buildIndustryBreakdown(jobs), [jobs])
-  const locationRemoteStats = useMemo(() => buildLocationRemoteStats(jobs, 10), [jobs])
-
   const filteredMetrics = useMemo(
     () => ({
       total: filteredJobs.length,
@@ -157,41 +142,29 @@ function AppContent() {
 
   return (
     <div className="app bg-slate-50 dark:bg-slate-950">
-      <header className="glass sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center gap-4">
+      <header className="site-header sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
           <Link to="/" className="flex items-center gap-3 no-underline group">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-              <img src="/logo-icon.svg" alt="" className="w-6 h-6" />
+            <div className="w-9 h-9 rounded-lg bg-slate-900 dark:bg-white flex items-center justify-center">
+              <img src={`${import.meta.env.BASE_URL}logo-icon.svg`} alt="" className="w-5 h-5" />
             </div>
-            <span className="text-xl font-bold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+            <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
               Jobs Analyzer
             </span>
           </Link>
-          <nav className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/"
-              className="btn-ghost text-sm"
-            >
+          <nav className="flex flex-wrap items-center gap-1" aria-label="Main navigation">
+            <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? 'nav-link-active' : ''}`}>
               Jobs board
-            </Link>
-            <Link
-              to="/companies"
-              className="btn-ghost text-sm"
-            >
+            </NavLink>
+            <NavLink to="/companies" className={({ isActive }) => `nav-link ${isActive ? 'nav-link-active' : ''}`}>
               Companies
-            </Link>
-            <Link
-              to="/analytics"
-              className="btn-secondary text-sm"
-            >
+            </NavLink>
+            <NavLink to="/analytics" className={({ isActive }) => `nav-link ${isActive ? 'nav-link-active' : ''}`}>
               Analytics
-            </Link>
-            <Link
-              to="/custom-analytics"
-              className="btn-primary text-sm"
-            >
+            </NavLink>
+            <NavLink to="/custom-analytics" className={({ isActive }) => `nav-link ${isActive ? 'nav-link-active' : ''}`}>
               Custom analytics
-            </Link>
+            </NavLink>
             <ThemeToggle />
           </nav>
         </div>
@@ -222,48 +195,46 @@ function AppContent() {
         <Route
           path="/companies"
           element={
+            <Suspense fallback={<RouteLoading />}>
             <CompaniesPage
               jobs={jobs}
               isLoading={isLoading}
               error={error}
               metadata={metadata}
             />
+            </Suspense>
           }
         />
         <Route
           path="/companies/:companyName"
           element={
+            <Suspense fallback={<RouteLoading />}>
             <CompanyDetailPage
               jobs={jobs}
               isLoading={isLoading}
               error={error}
               metadata={metadata}
             />
+            </Suspense>
           }
         />
+        <Route path="/jobs/:jobId" element={<Suspense fallback={<RouteLoading />}><JobDetailPage jobs={jobs} isLoading={isLoading} error={error} metadata={metadata} /></Suspense>} />
         <Route
           path="/analytics"
           element={
-            <AnalyticsPage
-              jobs={jobs}
-              metrics={overallMetrics}
-              companyActivity={companyActivity}
-              locationActivity={locationActivity}
-              locationRemoteStats={locationRemoteStats}
-              industryBreakdown={industryBreakdown}
-              salaryBenchmarks={salaryBenchmarks}
-              remoteSplit={remoteSplit}
-              postingTrends={postingTrends}
-              skillFrequency={overallSkillFrequency}
-              isLoading={isLoading}
-              error={error}
-              metadata={metadata}
-            />
+            <Suspense fallback={<RouteLoading />}>
+              <AnalyticsRoute jobs={jobs} isLoading={isLoading} error={error} metadata={metadata} metrics={overallMetrics} />
+            </Suspense>
           }
         />
+        <Route path="*" element={<Suspense fallback={<RouteLoading />}><NotFoundPage /></Suspense>} />
         <Route
           path="/custom-analytics"
-          element={<CustomAnalyticsPage jobs={jobs} isLoading={isLoading} error={error} metadata={metadata} />}
+          element={
+            <Suspense fallback={<RouteLoading />}>
+              <CustomAnalyticsPage jobs={jobs} isLoading={isLoading} error={error} metadata={metadata} />
+            </Suspense>
+          }
         />
       </Routes>
 
@@ -275,6 +246,12 @@ function AppContent() {
     </div>
   )
 }
+
+const RouteLoading = () => (
+  <main className="mx-auto max-w-7xl px-4 py-16 text-center text-slate-500 dark:text-slate-400" role="status">
+    Loading analytics…
+  </main>
+)
 
 function App() {
   return (

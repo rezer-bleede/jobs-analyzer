@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react'
 
-type Theme = 'light' | 'dark' | 'neon'
+type Theme = 'light' | 'dark'
 
 interface ThemeContextType {
   theme: Theme
@@ -10,7 +10,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-const themes: Theme[] = ['light', 'dark', 'neon']
+const themes: Theme[] = ['light', 'dark']
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = window.document.documentElement
-    root.classList.remove('light', 'dark', 'neon')
+    root.classList.remove('light', 'dark')
     root.classList.add(theme)
     localStorage.setItem('theme', theme)
   }, [theme])
@@ -57,4 +57,3 @@ export function useTheme() {
   }
   return context
 }
-
