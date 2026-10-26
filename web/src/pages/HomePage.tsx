@@ -64,8 +64,8 @@ export const HomePage = ({
   }
 
   return (
-  <main className="py-6 lg:py-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="py-6 lg:py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <header className="mb-8">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-center lg:justify-between">
           <div className="flex-1">
@@ -149,7 +149,7 @@ export const HomePage = ({
               ? `Showing ${filteredJobs.length.toLocaleString()} ${filteredJobs.length === 1 ? 'role' : 'roles'}`
               : `Showing ${((page - 1) * JOBS_PER_PAGE + 1).toLocaleString()}–${Math.min(page * JOBS_PER_PAGE, filteredJobs.length).toLocaleString()} of ${filteredJobs.length.toLocaleString()} roles`}
         </h2>
-          {!isLoading && jobs.length !== filteredJobs.length && (
+        {!isLoading && jobs.length !== filteredJobs.length && (
           <span className="badge badge-secondary">
             Filtered from {jobs.length.toLocaleString()} total
           </span>
@@ -200,7 +200,7 @@ export const HomePage = ({
           </button>
         </nav>
       )}
-    </div>
-  </main>
+      </div>
+    </main>
   )
 }
