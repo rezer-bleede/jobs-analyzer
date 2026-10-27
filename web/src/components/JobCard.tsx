@@ -2,30 +2,7 @@ import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { MapPin, Calendar, DollarSign, ExternalLink } from 'lucide-react'
 import type { Job } from '../types/job'
-
-const formatDate = (value?: string | null): string => {
-  if (!value) return 'Date not provided'
-  const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return 'Date not provided'
-  return parsed.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
-const formatSalaryRange = (job: Job): string | null => {
-  if (job.minSalary && job.maxSalary && job.currency) {
-    return `${job.minSalary.toLocaleString()} - ${job.maxSalary.toLocaleString()} ${job.currency}`
-  }
-  if (job.minSalary && job.currency) {
-    return `From ${job.minSalary.toLocaleString()} ${job.currency}`
-  }
-  if (job.maxSalary && job.currency) {
-    return `Up to ${job.maxSalary.toLocaleString()} ${job.currency}`
-  }
-  return null
-}
+import { formatJobDate, formatRemote, formatSalaryRange } from '../utils/jobFormat'
 
 const SkillBadges = memo(({ skills, label }: { skills: string[]; label: string }) => {
   if (skills.length === 0) return null
@@ -48,8 +25,7 @@ SkillBadges.displayName = 'SkillBadges'
 
 const JobCardContent = ({ job }: { job: Job }) => {
   const salaryLabel = formatSalaryRange(job)
-  const remoteLabel =
-    job.isRemote === true ? 'Remote' : job.isRemote === false ? 'On-site' : 'Hybrid'
+  const remoteLabel = formatRemote(job)
 
   return (
     <article className="job-card bg-white dark:bg-slate-900 rounded-2xl overflow-hidden h-full flex flex-col">
@@ -75,7 +51,7 @@ const JobCardContent = ({ job }: { job: Job }) => {
             )}
             <div className="flex items-center gap-1.5 sm:justify-end">
               <Calendar className="w-4 h-4" />
-              <span>{formatDate(job.postingDate)}</span>
+              <span>{formatJobDate(job.postingDate)}</span>
             </div>
           </div>
         </div>

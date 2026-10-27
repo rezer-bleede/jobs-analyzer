@@ -13,7 +13,9 @@ import {
   Layers,
 } from 'lucide-react'
 import { DataFreshness } from '../components/DataFreshness'
-import { JobCard } from '../components/JobCard'
+import { JobCollection } from '../components/JobCollection'
+import { JobViewToggle } from '../components/JobViewToggle'
+import { useJobView } from '../hooks/useJobView'
 import type { Job } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
 import { buildCompanies, type CompanyInfo } from '../utils/companies'
@@ -43,6 +45,7 @@ const formatDate = (value: string | null): string => {
 export const CompanyDetailPage = ({ jobs, isLoading, error, metadata }: CompanyDetailPageProps) => {
   const { companyName } = useParams<{ companyName: string }>()
   const decodedName = companyName ? decodeURIComponent(companyName) : ''
+  const [view, setView] = useJobView()
 
   const company: CompanyInfo | undefined = useMemo(() => {
     if (!decodedName) return undefined
@@ -371,15 +374,14 @@ export const CompanyDetailPage = ({ jobs, isLoading, error, metadata }: CompanyD
 
         {/* All Job Listings */}
         <div className="mb-8">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-violet-500" />
-            All Job Listings ({companyJobs.length})
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {companyJobs.map(job => (
-              <JobCard key={job.id} job={job} />
-            ))}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-violet-500" />
+              All Job Listings ({companyJobs.length})
+            </h2>
+            <JobViewToggle view={view} onChange={setView} />
           </div>
+          <JobCollection jobs={companyJobs} view={view} />
         </div>
       </div>
     </main>

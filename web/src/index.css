@@ -91,6 +91,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .card-modern:hover { box-shadow: 0 8px 24px rgb(23 33 27 / .08); }
 .job-card { border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); transition: border-color .15s, box-shadow .15s; }
 .job-card:hover, .job-card:focus-within { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); box-shadow: 0 8px 24px rgb(23 33 27 / .07); }
+.job-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden; }
+.job-list > * + * { border-top: 1px solid var(--border); }
+.job-row { padding: .7rem .9rem; transition: background .15s; }
+.job-row:hover, .job-row:focus-within { background: var(--surface-muted); }
 .job-title-link { color: inherit; text-decoration: none; }
 .job-title-link:hover { color: var(--accent); }
 .glass { background: var(--surface); }

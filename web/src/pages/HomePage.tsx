@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, BarChart3 } from 'lucide-react'
 import { FilterBar } from '../components/FilterBar'
-import { JobCard } from '../components/JobCard'
+import { JobCollection } from '../components/JobCollection'
+import { JobViewToggle } from '../components/JobViewToggle'
 import { SkillHighlights } from '../components/SkillHighlights'
 import { SummaryMetrics } from '../components/SummaryMetrics'
 import { DataFreshness } from '../components/DataFreshness'
+import { useJobView } from '../hooks/useJobView'
 import type { Job, JobFilters } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
 import type { SkillFrequency } from '../utils/skills'
@@ -51,6 +53,7 @@ export const HomePage = ({
   onResetFilters,
 }: HomePageProps) => {
   const [page, setPage] = useState(1)
+  const [view, setView] = useJobView()
   const pageCount = Math.max(1, Math.ceil(filteredJobs.length / JOBS_PER_PAGE))
   const visibleJobs = filteredJobs.slice((page - 1) * JOBS_PER_PAGE, page * JOBS_PER_PAGE)
 
@@ -149,11 +152,14 @@ export const HomePage = ({
               ? `Showing ${filteredJobs.length.toLocaleString()} ${filteredJobs.length === 1 ? 'role' : 'roles'}`
               : `Showing ${((page - 1) * JOBS_PER_PAGE + 1).toLocaleString()}–${Math.min(page * JOBS_PER_PAGE, filteredJobs.length).toLocaleString()} of ${filteredJobs.length.toLocaleString()} roles`}
         </h2>
-        {!isLoading && jobs.length !== filteredJobs.length && (
-          <span className="badge badge-secondary">
-            Filtered from {jobs.length.toLocaleString()} total
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {!isLoading && jobs.length !== filteredJobs.length && (
+            <span className="badge badge-secondary">
+              Filtered from {jobs.length.toLocaleString()} total
+            </span>
+          )}
+          <JobViewToggle view={view} onChange={setView} />
+        </div>
       </section>
 
       {isLoading && (
@@ -171,11 +177,7 @@ export const HomePage = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        {visibleJobs.map((job) => (
-          <JobCard key={job.id} job={job} />
-        ))}
-      </div>
+      {!isLoading && visibleJobs.length > 0 && <JobCollection jobs={visibleJobs} view={view} />}
 
       {!isLoading && pageCount > 1 && (
         <nav aria-label="Job result pages" className="flex items-center justify-center gap-4 mt-8">
