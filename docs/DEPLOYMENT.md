@@ -47,6 +47,21 @@ npx gh-pages -d dist
 
 ## Cloudflare Pages
 
+### Deploy with Wrangler CLI
+
+Use Wrangler when deploying manually or when GitHub Actions does not have the Cloudflare API token configured. Log in once interactively, then build and deploy from `web/`:
+
+```bash
+npx wrangler@3.90.0 login
+cd web
+# Optional: set VITE_JOBS_DATA_URL before building to use the live R2 feed.
+npm ci
+npm run build
+npx wrangler@3.90.0 pages deploy dist --project-name=jobs-analyzer --branch=main
+```
+
+Wrangler uses its local OAuth credentials; no API token needs to be placed in the shell command. Production is served at <https://jobs-analyzer.pages.dev/>.
+
 ### Setup
 
 1. **Connect Repository:**
