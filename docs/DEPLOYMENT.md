@@ -47,9 +47,11 @@ npx gh-pages -d dist
 
 ## Cloudflare Pages
 
+The `jobs-analyzer` project has automatic deployments enabled for the connected Git repository. Push changes to `main` to deploy; production is <https://jobs-analyzer.pages.dev/>. Use the CLI steps below only for manual deployments or when automatic deployment is unavailable.
+
 ### Deploy with Wrangler CLI
 
-Use Wrangler when deploying manually or when GitHub Actions does not have the Cloudflare API token configured. Log in once interactively, then build and deploy from `web/`:
+For a manual deployment, log in once interactively, then build and deploy from `web/`:
 
 ```bash
 npx wrangler@3.90.0 login
@@ -60,7 +62,7 @@ npm run build
 npx wrangler@3.90.0 pages deploy dist --project-name=jobs-analyzer --branch=main
 ```
 
-Wrangler uses its local OAuth credentials; no API token needs to be placed in the shell command. Production is served at <https://jobs-analyzer.pages.dev/>.
+Wrangler uses its local OAuth credentials; no API token needs to be placed in the shell command.
 
 ### Setup
 
