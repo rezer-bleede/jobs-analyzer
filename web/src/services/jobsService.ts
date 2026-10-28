@@ -16,8 +16,9 @@ export interface JobsData {
 type RawJob = Record<string, unknown>
 const CACHE_FIELDS = [
   'job_hash', 'id', 'title', 'job_title_inferred', 'company', 'company_name_inferred', 'location',
-  'country_inferred', 'state_inferred', 'city_inferred', 'job_type', 'job_type_inferred', 'date_posted',
+  'country', 'country_inferred', 'state_inferred', 'city_inferred', 'job_type', 'job_type_inferred', 'date_posted',
   'min_amount', 'max_amount', 'currency', 'is_remote', 'site', 'job_url', 'job_url_direct',
+  'company_url', 'company_website_inferred', 'company_description', 'company_description_inferred', 'description', 'job_description',
   'desired_tech_skills_inferred', 'tech_skills', 'desired_soft_skills_inferred', 'soft_skills',
   'desired_domain_skills_inferred', 'domain_skills', 'company_industry', 'company_industry_inferred',
   'domains_inferred', 'job_description_inferred', 'job_requirements_inferred',
@@ -79,7 +80,7 @@ const buildLocation = (raw: RawJob): { label: string; country?: string; state?: 
   const location = stringOrNull(raw.location)
   const city = stringOrNull(raw.city_inferred)
   const state = stringOrNull(raw.state_inferred)
-  const rawCountry = stringOrNull(raw.country_inferred)
+  const rawCountry = stringOrNull(raw.country_inferred) ?? stringOrNull(raw.country)
 
   // Normalize country from explicit field, or extract from location string
   const country = normalizeCountry(rawCountry ?? undefined)
@@ -131,6 +132,8 @@ const normaliseJob = (raw: RawJob): Job => {
     postingDate,
     source: stringOrNull(raw.site),
     jobUrl: stringOrNull(raw.job_url) ?? stringOrNull(raw.job_url_direct),
+    companyUrl: stringOrNull(raw.company_website_inferred) ?? stringOrNull(raw.company_url),
+    companyDescription: stringOrNull(raw.company_description_inferred) ?? stringOrNull(raw.company_description),
     minSalary,
     maxSalary,
     currency,
@@ -138,7 +141,7 @@ const normaliseJob = (raw: RawJob): Job => {
     techSkills,
     softSkills,
     domainSkills,
-    summary: stringOrNull(raw.job_description_inferred),
+    summary: stringOrNull(raw.job_description_inferred) ?? stringOrNull(raw.job_description) ?? stringOrNull(raw.description),
     requirements: stringOrNull(raw.job_requirements_inferred),
     responsibilities: stringOrNull(raw.job_responsibilities_inferred),
     benefits: stringOrNull(raw.job_benefits_inferred),

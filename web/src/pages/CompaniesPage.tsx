@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import { ArrowLeft, Building2, MapPin, Briefcase, Users, Search, X } from 'lucide-react'
 import { DataFreshness } from '../components/DataFreshness'
 import type { Job } from '../types/job'
+import type { EmployerRecord } from '../types/employer'
 import type { JobsMetadata } from '../types/metadata'
 import { buildCompanies, filterCompanies, deriveFilterOptions, type CompanyInfo, type CompanyFilters, defaultCompanyFilters } from '../utils/companies'
 
 interface CompaniesPageProps {
   jobs: Job[]
+  employers: EmployerRecord[]
   isLoading: boolean
   error: string | null
   metadata: JobsMetadata | null
@@ -37,7 +39,7 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
             <div className="flex flex-wrap gap-2 text-sm text-slate-500 dark:text-slate-300">
               <span className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
-                {company.jobCount} {company.jobCount === 1 ? 'role' : 'roles'}
+              {company.jobCount} {company.jobCount === 1 ? 'role' : 'roles'}
               </span>
               {company.industries.length > 0 && (
                 <span className="flex items-center gap-1">
@@ -53,6 +55,34 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
                 </span>
               )}
             </div>
+            {(company.employer?.lei || company.employer?.is_ai_active || company.employer?.careers_sa_url) && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {company.employer.lei && <span className="badge badge-success text-xs">GLEIF identity</span>}
+                {company.employer.is_ai_active && <span className="badge badge-primary text-xs">Hugging Face activity</span>}
+                {company.employer.careers_sa_url && (
+                  <span className="badge badge-secondary text-xs">
+                    careers.sa: {company.employer.careers_sa_open_jobs ?? 0} listed openings
+                  </span>
+                )}
+              </div>
+            )}
+            {company.sources.length > 0 && (
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                Sources: {company.sources.join(', ')}
+              </p>
+            )}
+            {company.website && (
+              <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                Website: {company.employer?.domain ?? company.website}
+              </p>
+            )}
+            {(company.employer?.jobs_seen != null || company.employer?.data_ai_jobs_90d != null) && (
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {company.employer.data_ai_jobs_90d != null && `${company.employer.data_ai_jobs_90d} data & AI jobs (90 days)`}
+                {company.employer.data_ai_jobs_90d != null && company.employer.jobs_seen != null && ' · '}
+                {company.employer.jobs_seen != null && `${company.employer.jobs_seen} jobs seen`}
+              </p>
+            )}
           </div>
           <div className="flex flex-col sm:items-end gap-2">
             <div className="flex gap-2">
@@ -89,10 +119,10 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
 
 CompanyCard.displayName = 'CompanyCard'
 
-export const CompaniesPage = ({ jobs, isLoading, error, metadata }: CompaniesPageProps) => {
+export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: CompaniesPageProps) => {
   const [filters, setFilters] = useState<CompanyFilters>({ ...defaultCompanyFilters })
 
-  const companies = useMemo(() => buildCompanies(jobs), [jobs])
+  const companies = useMemo(() => buildCompanies(jobs, employers), [jobs, employers])
   const filterOptions = useMemo(() => deriveFilterOptions(companies), [companies])
   const filteredCompanies = useMemo(() => filterCompanies(companies, filters), [companies, filters])
 

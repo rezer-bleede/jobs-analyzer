@@ -4,6 +4,8 @@ import './App.css'
 import { ThemeToggle } from './components/ThemeToggle'
 import { HomePage } from './pages/HomePage'
 import { fetchJobs, type FetchJobsResult } from './services/jobsService'
+import { fetchEmployers } from './services/employersService'
+import type { EmployerRecord } from './types/employer'
 import type { Job, JobFilters } from './types/job'
 import type { JobsMetadata } from './types/metadata'
 import {
@@ -71,6 +73,7 @@ class ErrorBoundary extends React.Component<
 
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
+  const [employers, setEmployers] = useState<EmployerRecord[]>([])
   const [metadata, setMetadata] = useState<JobsMetadata | null>(null)
   const [filters, setFilters] = useState<JobFilters>({ ...defaultFilters })
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -82,10 +85,13 @@ function AppContent() {
       setIsLoading(true)
       setError(null)
       try {
-        const result: FetchJobsResult = await fetchJobs()
+        const [result, employerRecords]: [FetchJobsResult, EmployerRecord[]] = await Promise.all([
+          fetchJobs(), fetchEmployers(),
+        ])
         if (!ignore) {
           setJobs(result.jobs)
           setMetadata(result.metadata)
+          setEmployers(employerRecords)
         }
       } catch (err) {
         if (!ignore) {
@@ -198,6 +204,7 @@ function AppContent() {
             <Suspense fallback={<RouteLoading />}>
             <CompaniesPage
               jobs={jobs}
+              employers={employers}
               isLoading={isLoading}
               error={error}
               metadata={metadata}
@@ -211,6 +218,7 @@ function AppContent() {
             <Suspense fallback={<RouteLoading />}>
             <CompanyDetailPage
               jobs={jobs}
+              employers={employers}
               isLoading={isLoading}
               error={error}
               metadata={metadata}

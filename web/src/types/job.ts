@@ -10,6 +10,8 @@ export interface Job {
   postingDate?: string | null
   source?: string | null
   jobUrl?: string | null
+  companyUrl?: string | null
+  companyDescription?: string | null
   minSalary?: number | null
   maxSalary?: number | null
   currency?: string | null

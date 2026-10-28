@@ -17,11 +17,13 @@ import { JobCollection } from '../components/JobCollection'
 import { JobViewToggle } from '../components/JobViewToggle'
 import { useJobView } from '../hooks/useJobView'
 import type { Job } from '../types/job'
+import type { EmployerRecord } from '../types/employer'
 import type { JobsMetadata } from '../types/metadata'
 import { buildCompanies, type CompanyInfo } from '../utils/companies'
 
 interface CompanyDetailPageProps {
   jobs: Job[]
+  employers: EmployerRecord[]
   isLoading: boolean
   error: string | null
   metadata: JobsMetadata | null
@@ -42,16 +44,25 @@ const formatDate = (value: string | null): string => {
   return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export const CompanyDetailPage = ({ jobs, isLoading, error, metadata }: CompanyDetailPageProps) => {
+const externalUrl = (value: string): string | undefined => {
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`)
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata }: CompanyDetailPageProps) => {
   const { companyName } = useParams<{ companyName: string }>()
   const decodedName = companyName ? decodeURIComponent(companyName) : ''
   const [view, setView] = useJobView()
 
   const company: CompanyInfo | undefined = useMemo(() => {
     if (!decodedName) return undefined
-    const companies = buildCompanies(jobs)
+    const companies = buildCompanies(jobs, employers)
     return companies.find(c => c.name === decodedName)
-  }, [jobs, decodedName])
+  }, [jobs, employers, decodedName])
 
   const companyJobs = useMemo(() => {
     if (!decodedName) return []
@@ -132,6 +143,27 @@ export const CompanyDetailPage = ({ jobs, isLoading, error, metadata }: CompanyD
   }
 
   const maxSkillCount = techSkillFrequency.length > 0 ? techSkillFrequency[0][1] : 1
+  const employer = company.employer
+  const employerDetails = [
+    ['Company website', employer?.company_url ?? company.website],
+    ['Official domain', employer?.domain],
+    ['Company description', company.description],
+    ['Industry', employer?.industry ?? company.industries.join(', ')],
+    ['Jobs seen', employer?.jobs_seen],
+    ['Data & AI jobs (90 days)', employer?.data_ai_jobs_90d],
+    ['Cities', (employer?.cities?.length ? employer.cities : company.locations).join(', ')],
+    ['Sources', (employer?.sources?.length ? employer.sources : company.sources).join(', ')],
+    ['GLEIF legal name', employer?.legal_name],
+    ['LEI', employer?.lei],
+    ['Commercial registration', employer?.commercial_registration_number],
+    ['Registration authority', employer?.registration_authority],
+    ['Legal status', employer?.legal_status],
+    ['Registered / HQ location', [employer?.legal_city, employer?.legal_region, employer?.headquarters].filter(Boolean).join(' · ')],
+    ['GLEIF parent', [employer?.parent_legal_name, employer?.parent_lei].filter(Boolean).join(' · ')],
+    ['Wikidata ID', employer?.wikidata_id],
+    ['Careers.sa openings', employer?.careers_sa_url ? `${employer.careers_sa_open_jobs ?? 0} (${employer.careers_sa_url})` : undefined],
+    ['Hugging Face activity', employer?.is_ai_active ? `${employer.hf_model_count ?? 0} models · ${employer.hf_dataset_count ?? 0} datasets · ${(employer.hf_downloads ?? 0).toLocaleString()} downloads` : undefined],
+  ].filter(([, value]) => value != null && value !== '') as [string, string | number][]
 
   return (
     <main className="py-6 lg:py-10">
@@ -167,6 +199,33 @@ export const CompanyDetailPage = ({ jobs, isLoading, error, metadata }: CompanyD
           <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
             <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
           </div>
+        )}
+
+        {employerDetails.length > 0 && (
+          <section className="section-card mb-8" aria-labelledby="employer-sources-heading">
+            <h2 id="employer-sources-heading" className="text-lg font-bold text-slate-900 dark:text-white mb-4">
+              Company information & source signals
+            </h2>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              {employerDetails.map(([label, value]) => {
+                const href = label === 'Company website'
+                  ? externalUrl(String(value))
+                  : label === 'Official domain'
+                    ? externalUrl(String(value))
+                  : label === 'Careers.sa openings'
+                    ? externalUrl(String(value).match(/\((.*?)\)$/)?.[1] ?? '')
+                    : undefined
+                return (
+                  <div key={label}>
+                    <dt className="text-slate-500">{label}</dt>
+                    <dd className="font-medium break-words">
+                      {href ? <a href={href} target="_blank" rel="noreferrer" className="text-violet-600 dark:text-violet-400 underline">{value}</a> : value}
+                    </dd>
+                  </div>
+                )
+              })}
+            </dl>
+          </section>
         )}
 
         {/* Key Metrics */}

@@ -1,4 +1,5 @@
 import type { Job } from '../types/job'
+import type { EmployerRecord } from '../types/employer'
 import { normalizeCountry } from './jobFilters'
 
 export interface CompanyInfo {
@@ -18,6 +19,10 @@ export interface CompanyInfo {
   topDomainSkills: string[]
   latestPostingDate: string | null
   hasSalaryData: boolean
+  sources: string[]
+  website: string | null
+  description: string | null
+  employer?: EmployerRecord
 }
 
 export interface CompanyFilters {
@@ -36,7 +41,24 @@ export const defaultCompanyFilters: CompanyFilters = {
   jobType: 'All types',
 }
 
-export const buildCompanies = (jobs: Job[]): CompanyInfo[] => {
+export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): CompanyInfo[] => {
+  const employerByName = new Map<string, EmployerRecord>()
+  for (const employer of [...employers].sort((a, b) => (b.jobs_seen ?? 0) - (a.jobs_seen ?? 0))) {
+    const key = employer.company_name.trim().toLowerCase()
+    if (!key) continue
+    const previous = employerByName.get(key)
+    if (!previous) {
+      employerByName.set(key, employer)
+      continue
+    }
+    const merged = { ...employer, ...previous } as EmployerRecord
+    for (const field of Object.keys(employer) as (keyof EmployerRecord)[]) {
+      if (merged[field] == null) merged[field] = employer[field] as never
+    }
+    merged.cities = [...new Set([...(previous.cities ?? []), ...(employer.cities ?? [])])]
+    merged.sources = [...new Set([...(previous.sources ?? []), ...(employer.sources ?? [])])]
+    employerByName.set(key, merged)
+  }
   const companyMap = new Map<string, {
     jobs: Job[]
     locations: Set<string>
@@ -44,12 +66,15 @@ export const buildCompanies = (jobs: Job[]): CompanyInfo[] => {
     jobTitles: Set<string>
     industries: Set<string>
     jobTypes: Set<string>
+    sources: Set<string>
     remoteCount: number
     onsiteCount: number
     salaries: { min: number; max: number; currency: string }[]
     techSkills: Map<string, number>
     domainSkills: Map<string, number>
     latestDate: string | null
+    website: string | null
+    description: string | null
   }>()
 
   for (const job of jobs) {
@@ -65,12 +90,15 @@ export const buildCompanies = (jobs: Job[]): CompanyInfo[] => {
         jobTitles: new Set(),
         industries: new Set(),
         jobTypes: new Set(),
+        sources: new Set(),
         remoteCount: 0,
         onsiteCount: 0,
         salaries: [],
         techSkills: new Map(),
         domainSkills: new Map(),
         latestDate: null,
+        website: null,
+        description: null,
       }
       companyMap.set(companyName, entry)
     }
@@ -85,6 +113,9 @@ export const buildCompanies = (jobs: Job[]): CompanyInfo[] => {
     if (job.title) entry.jobTitles.add(job.title)
     if (job.industry) entry.industries.add(job.industry)
     if (job.jobType) entry.jobTypes.add(job.jobType)
+    if (job.source) entry.sources.add(job.source)
+    entry.website ??= job.companyUrl ?? null
+    entry.description ??= job.companyDescription ?? null
 
     if (job.isRemote === true) entry.remoteCount++
     else if (job.isRemote === false) entry.onsiteCount++
@@ -135,10 +166,11 @@ export const buildCompanies = (jobs: Job[]): CompanyInfo[] => {
       .slice(0, 3)
       .map(([skill]) => skill)
 
+    const employer = employerByName.get(name.trim().toLowerCase())
     companies.push({
       name,
       jobCount: data.jobs.length,
-      locations: [...data.locations].sort(),
+      locations: [...new Set([...data.locations, ...(employer?.cities ?? [])])].sort(),
       countries: [...data.countries].sort(),
       jobTitles: [...data.jobTitles].sort(),
       industries: [...data.industries].sort(),
@@ -152,6 +184,38 @@ export const buildCompanies = (jobs: Job[]): CompanyInfo[] => {
       topDomainSkills,
       latestPostingDate: data.latestDate,
       hasSalaryData: data.salaries.length > 0,
+      sources: [...new Set([...data.sources, ...(employer?.sources ?? [])])].sort(),
+      website: employer?.company_url || (employer?.domain ? `https://${employer.domain}` : null) || data.website,
+      description: data.description,
+      employer,
+    })
+  }
+
+  const includedNames = new Set(companies.map(company => company.name.trim().toLowerCase()))
+  for (const employer of employerByName.values()) {
+    const key = employer.company_name.trim().toLowerCase()
+    if (includedNames.has(key)) continue
+    companies.push({
+      name: employer.company_name,
+      jobCount: 0,
+      locations: employer.cities ?? [],
+      countries: ['Saudi Arabia'],
+      jobTitles: [],
+      industries: employer.industry ? [employer.industry] : [],
+      jobTypes: [],
+      remoteCount: 0,
+      onsiteCount: 0,
+      avgMinSalary: null,
+      avgMaxSalary: null,
+      salaryCurrency: null,
+      topTechSkills: [],
+      topDomainSkills: [],
+      latestPostingDate: null,
+      hasSalaryData: false,
+      sources: employer.sources ?? [],
+      website: employer.company_url || (employer.domain ? `https://${employer.domain}` : null),
+      description: null,
+      employer,
     })
   }
 

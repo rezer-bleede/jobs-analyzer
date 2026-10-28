@@ -37,6 +37,19 @@ describe('normaliseJobs', () => {
     })
   })
 
+  it('uses fields from non-enriched source records', () => {
+    expect(normaliseJobs([{
+      title: 'Data Engineer', company: 'Acme', location: 'Riyadh', country: 'Saudi Arabia',
+      site: 'careers', description: 'Build data systems', company_url: 'https://acme.example',
+      company_description: 'Acme builds software',
+    }])[0]).toMatchObject({
+      country: 'Saudi Arabia',
+      summary: 'Build data systems',
+      companyUrl: 'https://acme.example',
+      companyDescription: 'Acme builds software',
+    })
+  })
+
   it('handles new metadata wrapper format', () => {
     const payload = {
       metadata: {
