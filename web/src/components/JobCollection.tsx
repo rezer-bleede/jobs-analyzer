@@ -10,7 +10,7 @@ export const JobCollection = memo(({ jobs, view }: { jobs: Job[]; view: JobView 
 
   if (view === 'cards') {
     return (
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
         {jobs.map((job) => (
           <JobCard key={job.id} job={job} />
         ))}

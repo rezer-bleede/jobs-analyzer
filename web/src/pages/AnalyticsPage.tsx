@@ -5,7 +5,6 @@ import { DataFreshness } from '../components/DataFreshness'
 import { BarChart } from '../components/charts/BarChart'
 import { DonutChart } from '../components/charts/DonutChart'
 import { SparklineChart } from '../components/charts/SparklineChart'
-import type { Job } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
 import type { SkillFrequency } from '../utils/skills'
 import type {
@@ -20,7 +19,6 @@ import type {
 const refreshedDateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
 interface AnalyticsPageProps {
-  jobs: Job[]
   metrics: {
     total: number
     remote: number
@@ -49,7 +47,6 @@ const formatSalary = (value: number, currency: string): string => {
 }
 
 export const AnalyticsPage = ({
-  jobs,
   metrics,
   companyActivity,
   locationRemoteStats,
@@ -62,16 +59,11 @@ export const AnalyticsPage = ({
   error,
   metadata,
 }: AnalyticsPageProps) => (
-  <main className="py-6 lg:py-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <header className="flex flex-wrap justify-between items-start gap-4 mb-8">
+  <main className="py-3 lg:py-4">
+    <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="flex flex-wrap justify-between items-center gap-3 mb-3">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Talent market analytics</h1>
-          <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
-            {isLoading
-              ? 'Refreshing insights from the latest roles feed...'
-              : `${jobs.length.toLocaleString()} listings processed. Review velocity, remote adoption, salary benchmarks and geographic coverage.`}
-          </p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">Talent market analytics</h1>
         </div>
         <Link to="/" className="btn-secondary flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
@@ -86,13 +78,10 @@ export const AnalyticsPage = ({
         </div>
       )}
 
-      <section className="section-card mb-6">
-        <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6">
+      <section className="section-card mb-3">
+        <div className="flex flex-col lg:flex-row justify-between gap-3 mb-2">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Market snapshot</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Totals across the active dataset. Trends auto-refresh whenever the data feed updates.
-            </p>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Market snapshot</h2>
           </div>
           <div className="lg:text-right text-sm text-slate-500 dark:text-slate-400 flex flex-col lg:items-end gap-2">
             <span>Last refreshed {isLoading ? '...' : metadata?.lastUpdated ? refreshedDateFormatter.format(new Date(metadata.lastUpdated)) : 'unknown'}</span>
@@ -108,14 +97,11 @@ export const AnalyticsPage = ({
         />
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         <div className="section-card">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Hiring velocity</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Weekly postings for the past quarter with remote contributions highlighted.
-              </p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Hiring velocity</h2>
             </div>
             <span className="badge badge-secondary">{postingTrends.length} weeks</span>
           </div>
@@ -124,7 +110,7 @@ export const AnalyticsPage = ({
             ariaLabel="Weekly job posting trend"
             height={120}
           />
-          <div className="mt-4">
+          <div className="mt-2">
             <BarChart
               data={postingTrends
                 .slice(-5)
@@ -136,26 +122,20 @@ export const AnalyticsPage = ({
           </div>
         </div>
         <div className="section-card">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Remote adoption</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Share of listings marked as remote, on-site, or unspecified.
-              </p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Remote adoption</h2>
             </div>
           </div>
           <DonutChart segments={remoteSplit.map((segment) => ({ label: segment.label, value: segment.count }))} ariaLabel="Remote adoption split" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         <div className="section-card">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Salary benchmarks by currency</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Midpoint averages based on roles that disclose salary ranges.
-              </p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Salary benchmarks by currency</h2>
             </div>
             <DollarSign className="w-5 h-5 text-slate-400" />
           </div>
@@ -189,12 +169,9 @@ export const AnalyticsPage = ({
           )}
         </div>
         <div className="section-card">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Industry momentum</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Top sectors currently investing in data engineering talent.
-              </p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Industry momentum</h2>
             </div>
             <Briefcase className="w-5 h-5 text-slate-400" />
           </div>
@@ -209,14 +186,11 @@ export const AnalyticsPage = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         <div className="section-card">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Most active companies</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Ranked by postings published in the last two weeks.
-              </p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Most active companies</h2>
             </div>
             <Users className="w-5 h-5 text-slate-400" />
           </div>
@@ -227,12 +201,9 @@ export const AnalyticsPage = ({
           />
         </div>
         <div className="section-card">
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-2">
             <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Location coverage</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Remote mix and totals for the busiest hiring locations.
-              </p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Location coverage</h2>
             </div>
             <MapPin className="w-5 h-5 text-slate-400" />
           </div>
@@ -271,11 +242,8 @@ export const AnalyticsPage = ({
         </div>
       </div>
 
-      <section className="section-card mb-6">
+      <section className="section-card mb-3">
         <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Most in-demand skills</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-          Aggregated across every live listing. Highlighted skills appear most often in job descriptions.
-        </p>
         {skillFrequency.length === 0 ? (
           <p className="text-slate-500 dark:text-slate-400">No skill data available.</p>
         ) : (

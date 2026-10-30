@@ -98,16 +98,16 @@ describe('App', () => {
     )
 
     expect(await screen.findByText('Data Engineer 1')).toBeInTheDocument()
-    expect(screen.getByText('Data Engineer 20')).toBeInTheDocument()
-    expect(screen.queryByText('Data Engineer 21')).not.toBeInTheDocument()
-    expect(screen.getByText(/showing 1–20 of 45 roles/i)).toBeInTheDocument()
+    expect(screen.getByText('Data Engineer 30')).toBeInTheDocument()
+    expect(screen.queryByText('Data Engineer 31')).not.toBeInTheDocument()
+    expect(screen.getByText(/showing 1–30 of 45 roles/i)).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: 'Next' }))
 
-    expect(await screen.findByText('Data Engineer 21')).toBeInTheDocument()
-    expect(screen.getByText('Data Engineer 40')).toBeInTheDocument()
+    expect(await screen.findByText('Data Engineer 31')).toBeInTheDocument()
+    expect(screen.getByText('Data Engineer 45')).toBeInTheDocument()
     expect(screen.queryByText('Data Engineer 1')).not.toBeInTheDocument()
-    expect(screen.getByText('Page 2 of 3')).toBeInTheDocument()
+    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument()
   })
 
   it('filters jobs based on the search input', async () => {

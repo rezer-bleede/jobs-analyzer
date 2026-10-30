@@ -29,7 +29,7 @@ const JobCardContent = ({ job }: { job: Job }) => {
 
   return (
     <article className="job-card bg-white dark:bg-slate-900 rounded-2xl overflow-hidden h-full flex flex-col">
-      <div className="p-6 flex flex-col flex-1">
+      <div className="p-4 flex flex-col flex-1">
         <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-3">

@@ -12,11 +12,8 @@ export const SkillHighlights = ({ skills, maxVisible = 12 }: SkillHighlightsProp
   const maxValue = visibleSkills[0]?.count ?? 1
 
   return (
-    <section className="section-card mb-6">
-      <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">In-demand technologies</h2>
-      <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-        Based on the latest job descriptions from leading employers across the Middle East.
-      </p>
+    <section className="section-card mb-3 flex flex-wrap items-center gap-2">
+      <h2 className="text-lg font-bold text-slate-900 dark:text-white">In-demand technologies</h2>
       <div className="flex flex-wrap gap-2">
         {visibleSkills.map((skill, index) => {
           const intensity = Math.max(0.3, skill.count / maxValue)

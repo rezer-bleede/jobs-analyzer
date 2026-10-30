@@ -7,6 +7,7 @@ interface SearchMultiSelectProps {
   placeholder: string
   selected: string[]
   options: string[]
+  compactLabel?: boolean
   disabled?: boolean
   onChange: (next: string[]) => void
 }
@@ -18,6 +19,7 @@ export const SearchMultiSelect = ({
   placeholder,
   selected,
   options,
+  compactLabel = false,
   disabled = false,
   onChange,
 }: SearchMultiSelectProps) => {
@@ -93,7 +95,7 @@ export const SearchMultiSelect = ({
 
   return (
     <div>
-      <label htmlFor={inputId} className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+      <label htmlFor={inputId} className={compactLabel ? 'sr-only' : 'block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2'}>
         {label}
       </label>
       <div className="relative">

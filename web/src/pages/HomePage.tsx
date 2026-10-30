@@ -12,7 +12,7 @@ import type { Job, JobFilters } from '../types/job'
 import type { JobsMetadata } from '../types/metadata'
 import type { SkillFrequency } from '../utils/skills'
 
-const JOBS_PER_PAGE = 20
+const JOBS_PER_PAGE = 30
 
 interface HomePageProps {
   jobs: Job[]
@@ -67,23 +67,16 @@ export const HomePage = ({
   }
 
   return (
-    <main className="py-6 lg:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <header className="mb-8">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-center lg:justify-between">
+    <main className="py-3 lg:py-4">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="mb-3">
+        <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
           <div className="flex-1">
-            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
               Data & AI roles in Saudi Arabia
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
-              A focused feed of data, engineering and AI opportunities. Apply filters to explore{' '}
-              <span className="font-semibold text-violet-600 dark:text-violet-400">{jobs.length.toLocaleString()}</span>{' '}
-              listings and find the{' '}
-              <span className="font-semibold text-cyan-600 dark:text-cyan-400">{filteredJobs.length.toLocaleString()}</span>{' '}
-              roles matching your criteria.
-            </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <a
               className="btn-secondary flex items-center gap-2"
               href="#job-results"
@@ -100,17 +93,6 @@ export const HomePage = ({
             </Link>
           </div>
         </div>
-        <div className="flex flex-wrap gap-4 mt-4 text-sm text-slate-500 dark:text-slate-400 items-center">
-          <span className="font-semibold text-slate-700 dark:text-slate-300">
-            {isLoading ? 'Refreshing data...' : `${metrics.total.toLocaleString()} live roles · ${metrics.remote.toLocaleString()} remote`}
-          </span>
-          <span className="hidden sm:inline">•</span>
-          <span>Hiring companies: {isLoading ? '—' : metrics.companies}</span>
-          <span>•</span>
-          <span>Regional coverage: {isLoading ? '—' : `${metrics.countries} countries`}</span>
-          <span>•</span>
-          <DataFreshness metadata={metadata} isLoading={isLoading} />
-        </div>
       </header>
 
       {error && (
@@ -126,6 +108,7 @@ export const HomePage = ({
         companies={metrics.companies}
         countries={metrics.countries}
         isLoading={isLoading}
+        freshness={<DataFreshness metadata={metadata} isLoading={isLoading} />}
       />
 
       <FilterBar
@@ -143,7 +126,7 @@ export const HomePage = ({
 
       <section
         id="job-results"
-        className="flex flex-wrap justify-between items-center gap-3 mb-4"
+        className="flex flex-wrap justify-between items-center gap-2 mb-2"
       >
         <h2 className="text-lg font-bold text-slate-900 dark:text-white">
           {isLoading
@@ -180,7 +163,7 @@ export const HomePage = ({
       {!isLoading && visibleJobs.length > 0 && <JobCollection jobs={visibleJobs} view={view} />}
 
       {!isLoading && pageCount > 1 && (
-        <nav aria-label="Job result pages" className="flex items-center justify-center gap-4 mt-8">
+        <nav aria-label="Job result pages" className="flex items-center justify-center gap-4 mt-4">
           <button
             type="button"
             className="btn-secondary"

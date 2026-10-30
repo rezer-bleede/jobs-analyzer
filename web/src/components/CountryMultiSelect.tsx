@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useEffect, useMemo } from 'react'
+import { memo, useId, useState, useRef, useEffect, useMemo } from 'react'
 import { X, ChevronDown, Check, Search } from 'lucide-react'
 
 interface CountryMultiSelectProps {
@@ -6,6 +6,7 @@ interface CountryMultiSelectProps {
   placeholder?: string
   selected: string[]
   options: string[]
+  compactLabel?: boolean
   onChange: (countries: string[]) => void
   disabled?: boolean
 }
@@ -54,10 +55,12 @@ const CountryMultiSelectInner = ({
   placeholder = 'Select countries',
   selected,
   options,
+  compactLabel = false,
   onChange,
   disabled = false,
 }: CountryMultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false)
+  const buttonId = useId()
   const [searchQuery, setSearchQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -105,13 +108,14 @@ const CountryMultiSelectInner = ({
 
   return (
     <div ref={containerRef} className="relative">
-      <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+      <label htmlFor={buttonId} className={compactLabel ? 'sr-only' : 'block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2'}>
         {label}
       </label>
 
       <button
         type="button"
-        className="input-modern flex justify-between items-center text-left"
+        id={buttonId}
+        className="input-modern flex min-h-[44px] justify-between items-center text-left"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         aria-expanded={isOpen}

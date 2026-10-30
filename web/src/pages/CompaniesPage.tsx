@@ -2,6 +2,8 @@ import { memo, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Building2, MapPin, Briefcase, Users, Search, X } from 'lucide-react'
 import { DataFreshness } from '../components/DataFreshness'
+import { JobViewToggle } from '../components/JobViewToggle'
+import { useJobView } from '../hooks/useJobView'
 import type { Job } from '../types/job'
 import type { EmployerRecord } from '../types/employer'
 import type { JobsMetadata } from '../types/metadata'
@@ -23,14 +25,24 @@ const formatSalary = (value: number, currency: string): string => {
   }
 }
 
+const websiteLabel = (company: CompanyInfo): string | null => {
+  const value = company.employer?.domain ?? company.website
+  if (!value) return null
+  try {
+    return new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`).hostname.replace(/^www\./, '')
+  } catch {
+    return value
+  }
+}
+
 const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
   return (
     <Link
       to={`/companies/${encodeURIComponent(company.name)}`}
       className="section-card overflow-hidden block no-underline cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 hover:border-violet-300 dark:hover:border-violet-700"
     >
-      <div className="p-5">
-        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
+      <div>
+        <div className="flex flex-col sm:flex-row justify-between gap-3 mb-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Building2 className="w-5 h-5 text-violet-600 dark:text-violet-400" />
@@ -119,8 +131,51 @@ const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
 
 CompanyCard.displayName = 'CompanyCard'
 
+const CompanyListRow = memo(({ company }: { company: CompanyInfo }) => (
+  <Link
+    to={`/companies/${encodeURIComponent(company.name)}`}
+    className="company-row flex flex-wrap items-center justify-between gap-x-4 gap-y-2 no-underline"
+  >
+    <div className="min-w-0 flex-1">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white truncate">{company.name}</h3>
+        <span className="flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300">
+          <Users className="w-4 h-4" />
+          {company.jobCount} {company.jobCount === 1 ? 'role' : 'roles'}
+        </span>
+        {company.industries[0] && <span className="max-w-[18rem] truncate text-sm text-slate-500 dark:text-slate-400" title={company.industries[0]}>{company.industries[0]}</span>}
+        {company.countries.length > 0 && (
+          <span className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+            <MapPin className="w-4 h-4" />
+            {company.countries.slice(0, 2).join(', ')}
+          </span>
+        )}
+      </div>
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+        {company.locations.length > 0 && <span className="max-w-[22rem] truncate" title={company.locations.join(', ')}>{company.locations.slice(0, 2).join(', ')}{company.locations.length > 2 && ` +${company.locations.length - 2}`}</span>}
+        {company.sources.length > 0 && <span className="max-w-[14rem] truncate" title={company.sources.join(', ')}>Sources: {company.sources.join(', ')}</span>}
+        {websiteLabel(company) && <span className="max-w-[18rem] truncate" title={company.website ?? undefined}>{websiteLabel(company)}</span>}
+        {company.employer?.data_ai_jobs_90d != null && <span>{company.employer.data_ai_jobs_90d} data & AI jobs (90 days)</span>}
+        {company.topTechSkills.length > 0 && <span className="max-w-[18rem] truncate" title={company.topTechSkills.join(', ')}>Skills: {company.topTechSkills.join(', ')}</span>}
+      </div>
+    </div>
+    <div className="flex shrink-0 flex-wrap items-center gap-2">
+      {company.remoteCount > 0 && <span className="badge badge-success">Remote: {company.remoteCount}</span>}
+      {company.onsiteCount > 0 && <span className="badge badge-accent">On-site: {company.onsiteCount}</span>}
+      {company.hasSalaryData && company.avgMinSalary && company.avgMaxSalary && company.salaryCurrency && (
+        <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+          {formatSalary(company.avgMinSalary, company.salaryCurrency)} – {formatSalary(company.avgMaxSalary, company.salaryCurrency)}
+        </span>
+      )}
+    </div>
+  </Link>
+))
+
+CompanyListRow.displayName = 'CompanyListRow'
+
 export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: CompaniesPageProps) => {
   const [filters, setFilters] = useState<CompanyFilters>({ ...defaultCompanyFilters })
+  const [view, setView] = useJobView()
 
   const companies = useMemo(() => buildCompanies(jobs, employers), [jobs, employers])
   const filterOptions = useMemo(() => deriveFilterOptions(companies), [companies])
@@ -142,11 +197,11 @@ export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: C
     filters.jobType !== 'All types'
 
   return (
-    <main className="py-6 lg:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="flex flex-wrap justify-between items-start gap-4 mb-8">
+    <main className="py-3 lg:py-4">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="flex flex-wrap justify-between items-center gap-3 mb-3">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Companies</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">Companies</h1>
             <p className="text-slate-600 dark:text-slate-300 max-w-2xl">
               {isLoading
                 ? 'Loading company data...'
@@ -171,13 +226,14 @@ export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: C
           </div>
         )}
 
-        <section className="section-card mb-6">
+        <section className="section-card mb-3">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 lg:gap-4">
             <div className="relative md:col-span-2 lg:col-span-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-300 pointer-events-none" />
               <input
                 type="text"
                 className="input-modern pl-10"
+                style={{ paddingLeft: '2.5rem' }}
                 placeholder="Search by company, industry, skill, or location..."
                 value={filters.search}
                 onChange={(e) => updateFilter('search', e.target.value)}
@@ -232,7 +288,7 @@ export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: C
           </div>
         </section>
 
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-wrap justify-between items-center gap-2 mb-2">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">
             {isLoading ? 'Loading...' : `${filteredCompanies.length.toLocaleString()} companies`}
           </h2>
@@ -241,6 +297,7 @@ export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: C
               Filtered from {companies.length.toLocaleString()} total
             </span>
           )}
+          <JobViewToggle view={view} onChange={setView} label="Company layout" />
         </div>
 
         {isLoading && (
@@ -266,11 +323,47 @@ export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: C
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {filteredCompanies.map(company => (
-            <CompanyCard key={company.name} company={company} />
-          ))}
-        </div>
+        {!isLoading && view === 'list' && (
+          <div className="company-list">
+            {filteredCompanies.map(company => <CompanyListRow key={company.name} company={company} />)}
+          </div>
+        )}
+        {!isLoading && view === 'cards' && (
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
+            {filteredCompanies.map(company => <CompanyCard key={company.name} company={company} />)}
+          </div>
+        )}
+        {!isLoading && view === 'table' && (
+          <div className="job-card overflow-x-auto">
+            <table className="table-modern">
+              <caption className="sr-only">Companies and available hiring data</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Company</th>
+                  <th scope="col">Roles</th>
+                  <th scope="col">Industry</th>
+                  <th scope="col">Locations</th>
+                  <th scope="col">Sources</th>
+                  <th scope="col">Technology</th>
+                  <th scope="col">Website</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredCompanies.map(company => (
+                  <tr key={company.name}>
+                    <td className="min-w-48"><Link to={`/companies/${encodeURIComponent(company.name)}`} className="job-title-link font-semibold">{company.name}</Link></td>
+                    <td className="whitespace-nowrap">{company.jobCount}</td>
+                    <td>{company.industries.join(', ') || '—'}</td>
+                    <td>{[...new Set([...company.countries, ...company.locations])].join(', ') || '—'}</td>
+                    <td>{company.sources.join(', ') || '—'}</td>
+                    <td>{company.topTechSkills.join(', ') || '—'}</td>
+                    <td>{company.employer?.domain ?? company.website ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </main>
   )

@@ -31,7 +31,6 @@ export const AnalyticsRoute = ({ jobs, isLoading, error, metadata, metrics }: An
 
   return (
     <AnalyticsPage
-      jobs={jobs}
       metrics={metrics}
       companyActivity={companyActivity}
       locationRemoteStats={locationRemoteStats}

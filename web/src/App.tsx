@@ -149,7 +149,7 @@ function AppContent() {
   return (
     <div className="app bg-slate-50 dark:bg-slate-950">
       <header className="site-header sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-4">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap justify-between items-center gap-3">
           <Link to="/" className="flex items-center gap-3 no-underline group">
             <div className="w-9 h-9 rounded-lg bg-slate-900 dark:bg-white flex items-center justify-center">
               <img src={`${import.meta.env.BASE_URL}logo-icon.svg`} alt="" className="w-5 h-5" />
@@ -246,8 +246,8 @@ function AppContent() {
         />
       </Routes>
 
-      <footer className="py-6 text-center text-slate-500 dark:text-slate-400 text-sm border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 mt-auto">
-        <div className="max-w-7xl mx-auto px-4">
+      <footer className="py-3 text-center text-slate-500 dark:text-slate-400 text-sm border-t border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 mt-auto">
+        <div className="max-w-[90rem] mx-auto px-4">
           Built with React, Tailwind CSS, and Cloudflare Pages · Data served from Cloudflare R2
         </div>
       </footer>

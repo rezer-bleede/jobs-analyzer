@@ -160,18 +160,18 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
   }
 
   return (
-    <main className="py-6 lg:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="mb-8">
+    <main className="py-3 lg:py-4">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="mb-3">
           <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Custom analytics workspace</h1>
           <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
             Build bespoke charts and tables on top of the live dataset. Combine filters, grouping dimensions and visual styles to answer ad-hoc questions quickly.
           </p>
         </header>
 
-        <section className="section-card mb-6">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Create a widget</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+        <section className="section-card mb-3">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Create a widget</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
             <div className="lg:col-span-4">
               <label htmlFor="widget-field" className="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                 Group by
@@ -253,7 +253,7 @@ export const CustomAnalyticsPage = ({ jobs, isLoading, error }: CustomAnalyticsP
           </div>
         )}
 
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           {widgets.map((widget) => {
             const data = aggregatedData[widget.id] ?? []
 

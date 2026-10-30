@@ -10,13 +10,15 @@ const ICONS = {
 export const JobViewToggle = ({
   view,
   onChange,
+  label = 'Job layout',
 }: {
   view: JobView
   onChange: (view: JobView) => void
+  label?: string
 }) => (
   <div
     role="group"
-    aria-label="Job layout"
+    aria-label={label}
     className="inline-flex items-center gap-0.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-0.5"
   >
     {JOB_VIEWS.map(({ value, label }) => {

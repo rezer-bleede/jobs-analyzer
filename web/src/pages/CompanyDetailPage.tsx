@@ -112,8 +112,8 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
 
   if (isLoading) {
     return (
-      <main className="py-6 lg:py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="py-3 lg:py-4">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-16">
             <div className="w-12 h-12 border-4 border-violet-200 dark:border-violet-800 border-t-violet-600 dark:border-t-violet-400 rounded-full animate-spin" />
           </div>
@@ -124,8 +124,8 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
 
   if (!company) {
     return (
-      <main className="py-6 lg:py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="py-3 lg:py-4">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="section-card text-center py-12">
             <Building2 className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Company not found</h2>
@@ -144,6 +144,7 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
 
   const maxSkillCount = techSkillFrequency.length > 0 ? techSkillFrequency[0][1] : 1
   const employer = company.employer
+  const hasSalaryDisplay = Boolean(company.hasSalaryData && company.avgMinSalary && company.avgMaxSalary && company.salaryCurrency)
   const employerDetails = [
     ['Company website', employer?.company_url ?? company.website],
     ['Official domain', employer?.domain],
@@ -166,10 +167,10 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
   ].filter(([, value]) => value != null && value !== '') as [string, string | number][]
 
   return (
-    <main className="py-6 lg:py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="py-3 lg:py-4">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <header className="flex flex-wrap justify-between items-start gap-4 mb-8">
+        <header className="flex flex-wrap justify-between items-start gap-3 mb-3">
           <div>
             <Link
               to="/companies"
@@ -196,17 +197,17 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
         </header>
 
         {error && (
-          <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+          <div role="alert" className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 mb-3">
             <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
           </div>
         )}
 
         {employerDetails.length > 0 && (
-          <section className="section-card mb-8" aria-labelledby="employer-sources-heading">
-            <h2 id="employer-sources-heading" className="text-lg font-bold text-slate-900 dark:text-white mb-4">
+          <section className="section-card mb-3" aria-labelledby="employer-sources-heading">
+            <h2 id="employer-sources-heading" className="text-lg font-bold text-slate-900 dark:text-white mb-2">
               Company information & source signals
             </h2>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+            <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
               {employerDetails.map(([label, value]) => {
                 const href = label === 'Company website'
                   ? externalUrl(String(value))
@@ -229,56 +230,44 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
         )}
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="metric-card">
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
-              <Users className="w-4 h-4" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Open Roles</span>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+          <div className="metric-card flex items-center gap-2">
+            <Users className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-400" />
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{company.jobCount}</p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Open Roles</span>
           </div>
-          <div className="metric-card">
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
-              <Globe className="w-4 h-4" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Locations</span>
-            </div>
+          <div className="metric-card flex items-center gap-2">
+            <Globe className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-400" />
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{company.locations.length}</p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Locations</span>
           </div>
-          <div className="metric-card">
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
-              <Briefcase className="w-4 h-4" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Remote</span>
-            </div>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {company.remoteCount}
-              <span className="text-sm font-normal text-slate-500 dark:text-slate-400 ml-1">
-                / {company.onsiteCount} on-site
-              </span>
-            </p>
+          <div className="metric-card flex items-center gap-2">
+            <Briefcase className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-400" />
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{company.remoteCount}</p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Remote <span className="text-sm font-normal">· {company.onsiteCount} on-site</span>
+            </span>
           </div>
-          <div className="metric-card">
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
-              <Clock className="w-4 h-4" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Latest Post</span>
-            </div>
+          <div className="metric-card flex items-center gap-2">
+            <Clock className="w-4 h-4 shrink-0 text-slate-500 dark:text-slate-400" />
             <p className="text-lg font-bold text-slate-900 dark:text-white">{formatDate(company.latestPostingDate)}</p>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Latest Post</span>
           </div>
         </div>
 
         {/* Salary & Overview Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className={`grid grid-cols-1 gap-3 mb-3 ${hasSalaryDisplay ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}`}>
           {/* Salary Info */}
-          <div className="section-card">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          {hasSalaryDisplay && <div className="section-card">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-emerald-500" />
               Salary Information
             </h2>
-            {company.hasSalaryData && company.avgMinSalary && company.avgMaxSalary && company.salaryCurrency ? (
-              <div>
-                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 mb-4">
+            <div>
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-2 mb-2">
                   <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 mb-1">Average Range</p>
                   <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
-                    {formatSalary(company.avgMinSalary, company.salaryCurrency)} – {formatSalary(company.avgMaxSalary, company.salaryCurrency)}
+                    {formatSalary(company.avgMinSalary!, company.salaryCurrency!)} – {formatSalary(company.avgMaxSalary!, company.salaryCurrency!)}
                   </p>
                 </div>
                 {salaryByRole.length > 0 && (
@@ -296,19 +285,16 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
                     </div>
                   </div>
                 )}
-              </div>
-            ) : (
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No salary data available for this company.</p>
-            )}
-          </div>
+            </div>
+          </div>}
 
           {/* Locations & Job Types */}
           <div className="section-card">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
               <MapPin className="w-5 h-5 text-violet-500" />
               Locations & Job Types
             </h2>
-            <div className="mb-4">
+            <div className="mb-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-2">Countries</p>
               <div className="flex flex-wrap gap-1.5">
                 {company.countries.map(c => (
@@ -316,7 +302,7 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
                 ))}
               </div>
             </div>
-            <div className="mb-4">
+            <div className="mb-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-300 mb-2">Locations</p>
               <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto">
                 {company.locations.map(l => (
@@ -336,10 +322,10 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
         </div>
 
         {/* Skills Analysis */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {(techSkillFrequency.length > 0 || domainSkillFrequency.length > 0 || softSkillFrequency.length > 0) && <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
           {/* Tech Skills */}
-          <div className="section-card">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          {techSkillFrequency.length > 0 && <div className="section-card">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
               <Layers className="w-5 h-5 text-violet-500" />
               Tech Skills
             </h2>
@@ -360,14 +346,12 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No tech skills data.</p>
-            )}
-          </div>
+            ) : null}
+          </div>}
 
           {/* Domain Skills */}
-          <div className="section-card">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          {domainSkillFrequency.length > 0 && <div className="section-card">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
               <Briefcase className="w-5 h-5 text-cyan-500" />
               Domain Skills
             </h2>
@@ -391,14 +375,12 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
                   )
                 })}
               </div>
-            ) : (
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No domain skills data.</p>
-            )}
-          </div>
+            ) : null}
+          </div>}
 
           {/* Soft Skills */}
-          <div className="section-card">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+          {softSkillFrequency.length > 0 && <div className="section-card">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
               <Users className="w-5 h-5 text-emerald-500" />
               Soft Skills
             </h2>
@@ -410,15 +392,13 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
                   </span>
                 ))}
               </div>
-            ) : (
-              <p className="text-slate-500 dark:text-slate-400 text-sm">No soft skills data.</p>
-            )}
-          </div>
-        </div>
+            ) : null}
+          </div>}
+        </div>}
 
         {/* Job Titles Overview */}
-        <div className="section-card mb-8">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        {company.jobTitles.length > 0 && <div className="section-card mb-3">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
             <Briefcase className="w-5 h-5 text-violet-500" />
             Open Positions ({company.jobTitles.length} unique titles)
           </h2>
@@ -429,11 +409,11 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
               </span>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* All Job Listings */}
-        <div className="mb-8">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-3">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Calendar className="w-5 h-5 text-violet-500" />
               All Job Listings ({companyJobs.length})
