@@ -5,6 +5,8 @@ import { ThemeToggle } from './components/ThemeToggle'
 import { HomePage } from './pages/HomePage'
 import { fetchJobs, type FetchJobsResult } from './services/jobsService'
 import { fetchEmployers } from './services/employersService'
+import { fetchCompanyAliases } from './services/companyAliasesService'
+import type { CompanyAlias } from './types/companyAlias'
 import type { EmployerRecord } from './types/employer'
 import type { Job, JobFilters } from './types/job'
 import type { JobsMetadata } from './types/metadata'
@@ -74,6 +76,7 @@ class ErrorBoundary extends React.Component<
 function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [employers, setEmployers] = useState<EmployerRecord[]>([])
+  const [companyAliases, setCompanyAliases] = useState<CompanyAlias[]>([])
   const [metadata, setMetadata] = useState<JobsMetadata | null>(null)
   const [filters, setFilters] = useState<JobFilters>({ ...defaultFilters })
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -85,13 +88,14 @@ function AppContent() {
       setIsLoading(true)
       setError(null)
       try {
-        const [result, employerRecords]: [FetchJobsResult, EmployerRecord[]] = await Promise.all([
-          fetchJobs(), fetchEmployers(),
+        const [result, employerRecords, aliases]: [FetchJobsResult, EmployerRecord[], CompanyAlias[]] = await Promise.all([
+          fetchJobs(), fetchEmployers(), fetchCompanyAliases(),
         ])
         if (!ignore) {
           setJobs(result.jobs)
           setMetadata(result.metadata)
           setEmployers(employerRecords)
+          setCompanyAliases(aliases)
         }
       } catch (err) {
         if (!ignore) {
@@ -205,6 +209,7 @@ function AppContent() {
             <CompaniesPage
               jobs={jobs}
               employers={employers}
+              companyAliases={companyAliases}
               isLoading={isLoading}
               error={error}
               metadata={metadata}
@@ -219,6 +224,7 @@ function AppContent() {
             <CompanyDetailPage
               jobs={jobs}
               employers={employers}
+              companyAliases={companyAliases}
               isLoading={isLoading}
               error={error}
               metadata={metadata}

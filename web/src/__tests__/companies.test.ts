@@ -32,4 +32,28 @@ describe('buildCompanies employer records', () => {
       employer: { lei: 'LEI-2' },
     })
   })
+
+  it('groups only RefDataHub-approved aliases and leaves conflicts unmerged', () => {
+    const secondJob = { ...job, id: '2', company: 'Acme LLC' }
+    const companies = buildCompanies([job, secondJob], [
+      { company_name: 'ACME LLC', lei: 'LEI-1' },
+      { company_name: 'Shared Name', lei: 'LEI-2' },
+    ], [
+      { raw_value: 'Acme', canonical_id: 7, canonical_label: 'Acme Group' },
+      { raw_value: 'Acme LLC', canonical_id: 7, canonical_label: 'Acme Group' },
+      { raw_value: 'Shared Name', canonical_id: 7, canonical_label: 'Acme Group' },
+      { raw_value: 'Shared Name', canonical_id: 8, canonical_label: 'Other Group' },
+    ])
+
+    expect(companies).toHaveLength(2)
+    expect(companies.find(company => company.canonicalId === 7)).toMatchObject({
+      name: 'Acme Group',
+      jobCount: 2,
+      employer: { lei: 'LEI-1' },
+    })
+    expect(companies.find(company => company.name === 'Shared Name')).toMatchObject({
+      jobCount: 0,
+      employer: { lei: 'LEI-2' },
+    })
+  })
 })

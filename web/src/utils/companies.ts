@@ -1,9 +1,12 @@
 import type { Job } from '../types/job'
 import type { EmployerRecord } from '../types/employer'
+import type { CompanyAlias } from '../types/companyAlias'
 import { normalizeCountry } from './jobFilters'
 
 export interface CompanyInfo {
   name: string
+  canonicalId?: number
+  aliases: string[]
   jobCount: number
   locations: string[]
   countries: string[]
@@ -41,11 +44,43 @@ export const defaultCompanyFilters: CompanyFilters = {
   jobType: 'All types',
 }
 
-export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): CompanyInfo[] => {
+export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = [], aliases: CompanyAlias[] = []): CompanyInfo[] => {
+  const aliasByName = new Map<string, CompanyAlias>()
+  const aliasesByCanonicalId = new Map<number, Set<string>>()
+  const ambiguousAliases = new Set<string>()
+  for (const alias of aliases) {
+    const key = alias.raw_value.trim().toLowerCase()
+    if (!key || !Number.isInteger(alias.canonical_id) || alias.canonical_id <= 0 || !alias.canonical_label.trim()) continue
+    const previous = aliasByName.get(key)
+    if (previous && (previous.canonical_id !== alias.canonical_id || previous.canonical_label !== alias.canonical_label)) {
+      aliasByName.delete(key)
+      ambiguousAliases.add(key)
+    } else if (!ambiguousAliases.has(key)) {
+      aliasByName.set(key, alias)
+    }
+  }
+  for (const alias of aliasByName.values()) {
+    const names = aliasesByCanonicalId.get(alias.canonical_id) ?? new Set<string>()
+    names.add(alias.raw_value)
+    aliasesByCanonicalId.set(alias.canonical_id, names)
+  }
+  const identity = (name: string) => {
+    const normalized = name.trim().toLowerCase()
+    if (!normalized) return { key: '', canonicalId: undefined, name }
+    const alias = aliasByName.get(normalized)
+    return alias
+      ? { key: `refdata:${alias.canonical_id}`, canonicalId: alias.canonical_id, name: alias.canonical_label }
+      : { key: `name:${normalized}`, canonicalId: undefined, name }
+  }
+
   const employerByName = new Map<string, EmployerRecord>()
+  const employerNamesByKey = new Map<string, Set<string>>()
   for (const employer of [...employers].sort((a, b) => (b.jobs_seen ?? 0) - (a.jobs_seen ?? 0))) {
-    const key = employer.company_name.trim().toLowerCase()
+    const key = identity(employer.company_name).key
     if (!key) continue
+    const names = employerNamesByKey.get(key) ?? new Set<string>()
+    names.add(employer.company_name)
+    employerNamesByKey.set(key, names)
     const previous = employerByName.get(key)
     if (!previous) {
       employerByName.set(key, employer)
@@ -60,6 +95,9 @@ export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): C
     employerByName.set(key, merged)
   }
   const companyMap = new Map<string, {
+    name: string
+    canonicalId?: number
+    aliases: Set<string>
     jobs: Job[]
     locations: Set<string>
     countries: Set<string>
@@ -81,9 +119,13 @@ export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): C
     const companyName = job.company.trim()
     if (!companyName) continue
 
-    let entry = companyMap.get(companyName)
+    const resolved = identity(companyName)
+    let entry = companyMap.get(resolved.key)
     if (!entry) {
       entry = {
+        name: resolved.name,
+        canonicalId: resolved.canonicalId,
+        aliases: new Set(),
         jobs: [],
         locations: new Set(),
         countries: new Set(),
@@ -100,9 +142,10 @@ export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): C
         website: null,
         description: null,
       }
-      companyMap.set(companyName, entry)
+      companyMap.set(resolved.key, entry)
     }
 
+    entry.aliases.add(companyName)
     entry.jobs.push(job)
 
     if (job.location) entry.locations.add(job.location)
@@ -140,7 +183,7 @@ export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): C
 
   const companies: CompanyInfo[] = []
 
-  for (const [name, data] of companyMap) {
+  for (const [key, data] of companyMap) {
     let avgMinSalary: number | null = null
     let avgMaxSalary: number | null = null
     let salaryCurrency: string | null = null
@@ -166,9 +209,13 @@ export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): C
       .slice(0, 3)
       .map(([skill]) => skill)
 
-    const employer = employerByName.get(name.trim().toLowerCase())
+    const employer = employerByName.get(key)
+    const employerAliases = employerNamesByKey.get(key) ?? []
+    const mappedAliases = data.canonicalId == null ? [] : aliasesByCanonicalId.get(data.canonicalId) ?? []
     companies.push({
-      name,
+      name: data.name,
+      canonicalId: data.canonicalId,
+      aliases: [...new Set([...data.aliases, ...employerAliases, ...mappedAliases])],
       jobCount: data.jobs.length,
       locations: [...new Set([...data.locations, ...(employer?.cities ?? [])])].sort(),
       countries: [...data.countries].sort(),
@@ -191,12 +238,17 @@ export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = []): C
     })
   }
 
-  const includedNames = new Set(companies.map(company => company.name.trim().toLowerCase()))
-  for (const employer of employerByName.values()) {
-    const key = employer.company_name.trim().toLowerCase()
-    if (includedNames.has(key)) continue
+  const includedKeys = new Set(companyMap.keys())
+  for (const [key, employer] of employerByName) {
+    if (includedKeys.has(key)) continue
+    const resolved = identity(employer.company_name)
     companies.push({
-      name: employer.company_name,
+      name: resolved.name,
+      canonicalId: resolved.canonicalId,
+      aliases: [...new Set([
+        ...(employerNamesByKey.get(key) ?? []),
+        ...(resolved.canonicalId == null ? [] : aliasesByCanonicalId.get(resolved.canonicalId) ?? []),
+      ])],
       jobCount: 0,
       locations: employer.cities ?? [],
       countries: ['Saudi Arabia'],

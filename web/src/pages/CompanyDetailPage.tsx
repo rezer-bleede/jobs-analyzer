@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Building2,
@@ -18,12 +18,14 @@ import { JobViewToggle } from '../components/JobViewToggle'
 import { useJobView } from '../hooks/useJobView'
 import type { Job } from '../types/job'
 import type { EmployerRecord } from '../types/employer'
+import type { CompanyAlias } from '../types/companyAlias'
 import type { JobsMetadata } from '../types/metadata'
 import { buildCompanies, type CompanyInfo } from '../utils/companies'
 
 interface CompanyDetailPageProps {
   jobs: Job[]
   employers: EmployerRecord[]
+  companyAliases?: CompanyAlias[]
   isLoading: boolean
   error: string | null
   metadata: JobsMetadata | null
@@ -53,21 +55,26 @@ const externalUrl = (value: string): string | undefined => {
   }
 }
 
-export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata }: CompanyDetailPageProps) => {
+export const CompanyDetailPage = ({ jobs, employers, companyAliases = [], isLoading, error, metadata }: CompanyDetailPageProps) => {
   const { companyName } = useParams<{ companyName: string }>()
+  const [searchParams] = useSearchParams()
   const decodedName = companyName ? decodeURIComponent(companyName) : ''
+  const canonicalId = Number(searchParams.get('canonicalId')) || undefined
   const [view, setView] = useJobView()
 
   const company: CompanyInfo | undefined = useMemo(() => {
     if (!decodedName) return undefined
-    const companies = buildCompanies(jobs, employers)
-    return companies.find(c => c.name === decodedName)
-  }, [jobs, employers, decodedName])
+    const companies = buildCompanies(jobs, employers, companyAliases)
+    return canonicalId
+      ? companies.find(c => c.canonicalId === canonicalId)
+      : companies.find(c => c.name === decodedName)
+  }, [jobs, employers, companyAliases, decodedName, canonicalId])
 
   const companyJobs = useMemo(() => {
-    if (!decodedName) return []
-    return jobs.filter(j => j.company.trim() === decodedName)
-  }, [jobs, decodedName])
+    if (!company) return []
+    const names = new Set(company.aliases.map(name => name.trim().toLowerCase()))
+    return jobs.filter(job => names.has(job.company.trim().toLowerCase()))
+  }, [jobs, company])
 
   const techSkillFrequency = useMemo(() => {
     const freq = new Map<string, number>()
@@ -185,6 +192,11 @@ export const CompanyDetailPage = ({ jobs, employers, isLoading, error, metadata 
               </div>
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">{company.name}</h1>
+                {company.aliases.some(name => name !== company.name) && (
+                  <p className="text-slate-500 dark:text-slate-300 text-sm mt-0.5">
+                    Also listed as: {company.aliases.filter(name => name !== company.name).join(', ')}
+                  </p>
+                )}
                 {company.industries.length > 0 && (
                   <p className="text-slate-500 dark:text-slate-300 text-sm mt-0.5">{company.industries.join(' · ')}</p>
                 )}

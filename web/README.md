@@ -48,6 +48,7 @@ needed.
 | Variable             | Description                                                                                 |
 | -------------------- | ------------------------------------------------------------------------------------------- |
 | `VITE_JOBS_DATA_URL` | Absolute URL of the JSON payload in Cloudflare R2 that contains the job listings to render. |
+| `REFDATAHUB_API_URL` | RefDataHub API origin used by the Pages Function to fetch approved company aliases.         |
 
 > **CORS reminder:** Cloudflare R2 must return an `Access-Control-Allow-Origin` header that covers your deployment
 > (e.g. `*` or `https://<project>.pages.dev`). Without it the browser will surface a CORS error and the app will display a
@@ -79,8 +80,9 @@ npm test
 
 1. Connect the repository to a new Cloudflare Pages project.
 2. Set the build command to `npm run build` and the output directory to `dist`.
-3. Add `VITE_JOBS_DATA_URL` under environment variables and point it at your R2 object.
-4. Trigger a deployment – the site will statically build and fetch live job data on the client.
+3. Add `VITE_JOBS_DATA_URL` and point it at your R2 object.
+4. Add `REFDATAHUB_API_URL` as a Pages runtime variable pointing to the deployed RefDataHub API. Create a `company` dimension and approve raw company-name mappings there; unresolved or conflicting aliases remain separate.
+5. Trigger a deployment – the site fetches live jobs and approved company aliases through Pages Functions.
 
 ## License
 

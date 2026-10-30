@@ -6,12 +6,14 @@ import { JobViewToggle } from '../components/JobViewToggle'
 import { useJobView } from '../hooks/useJobView'
 import type { Job } from '../types/job'
 import type { EmployerRecord } from '../types/employer'
+import type { CompanyAlias } from '../types/companyAlias'
 import type { JobsMetadata } from '../types/metadata'
 import { buildCompanies, filterCompanies, deriveFilterOptions, type CompanyInfo, type CompanyFilters, defaultCompanyFilters } from '../utils/companies'
 
 interface CompaniesPageProps {
   jobs: Job[]
   employers: EmployerRecord[]
+  companyAliases?: CompanyAlias[]
   isLoading: boolean
   error: string | null
   metadata: JobsMetadata | null
@@ -35,10 +37,13 @@ const websiteLabel = (company: CompanyInfo): string | null => {
   }
 }
 
+const companyHref = (company: CompanyInfo) =>
+  `/companies/${encodeURIComponent(company.name)}${company.canonicalId ? `?canonicalId=${company.canonicalId}` : ''}`
+
 const CompanyCard = memo(({ company }: { company: CompanyInfo }) => {
   return (
     <Link
-      to={`/companies/${encodeURIComponent(company.name)}`}
+      to={companyHref(company)}
       className="section-card overflow-hidden block no-underline cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 hover:border-violet-300 dark:hover:border-violet-700"
     >
       <div>
@@ -133,7 +138,7 @@ CompanyCard.displayName = 'CompanyCard'
 
 const CompanyListRow = memo(({ company }: { company: CompanyInfo }) => (
   <Link
-    to={`/companies/${encodeURIComponent(company.name)}`}
+    to={companyHref(company)}
     className="company-row flex flex-wrap items-center justify-between gap-x-4 gap-y-2 no-underline"
   >
     <div className="min-w-0 flex-1">
@@ -173,11 +178,11 @@ const CompanyListRow = memo(({ company }: { company: CompanyInfo }) => (
 
 CompanyListRow.displayName = 'CompanyListRow'
 
-export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: CompaniesPageProps) => {
+export const CompaniesPage = ({ jobs, employers, companyAliases = [], isLoading, error, metadata }: CompaniesPageProps) => {
   const [filters, setFilters] = useState<CompanyFilters>({ ...defaultCompanyFilters })
   const [view, setView] = useJobView()
 
-  const companies = useMemo(() => buildCompanies(jobs, employers), [jobs, employers])
+  const companies = useMemo(() => buildCompanies(jobs, employers, companyAliases), [jobs, employers, companyAliases])
   const filterOptions = useMemo(() => deriveFilterOptions(companies), [companies])
   const filteredCompanies = useMemo(() => filterCompanies(companies, filters), [companies, filters])
 
@@ -351,7 +356,7 @@ export const CompaniesPage = ({ jobs, employers, isLoading, error, metadata }: C
               <tbody>
                 {filteredCompanies.map(company => (
                   <tr key={company.name}>
-                    <td className="min-w-48"><Link to={`/companies/${encodeURIComponent(company.name)}`} className="job-title-link font-semibold">{company.name}</Link></td>
+                    <td className="min-w-48"><Link to={companyHref(company)} className="job-title-link font-semibold">{company.name}</Link></td>
                     <td className="whitespace-nowrap">{company.jobCount}</td>
                     <td>{company.industries.join(', ') || '—'}</td>
                     <td>{[...new Set([...company.countries, ...company.locations])].join(', ') || '—'}</td>
