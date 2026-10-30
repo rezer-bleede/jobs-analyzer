@@ -19,6 +19,7 @@ import { useJobView } from '../hooks/useJobView'
 import type { Job } from '../types/job'
 import type { EmployerRecord } from '../types/employer'
 import type { CompanyAlias } from '../types/companyAlias'
+import type { CompanyIdentity } from '../types/companyIdentity'
 import type { JobsMetadata } from '../types/metadata'
 import { buildCompanies, type CompanyInfo } from '../utils/companies'
 
@@ -26,6 +27,7 @@ interface CompanyDetailPageProps {
   jobs: Job[]
   employers: EmployerRecord[]
   companyAliases?: CompanyAlias[]
+  companyIdentities?: CompanyIdentity[]
   isLoading: boolean
   error: string | null
   metadata: JobsMetadata | null
@@ -55,7 +57,7 @@ const externalUrl = (value: string): string | undefined => {
   }
 }
 
-export const CompanyDetailPage = ({ jobs, employers, companyAliases = [], isLoading, error, metadata }: CompanyDetailPageProps) => {
+export const CompanyDetailPage = ({ jobs, employers, companyAliases = [], companyIdentities = [], isLoading, error, metadata }: CompanyDetailPageProps) => {
   const { companyName } = useParams<{ companyName: string }>()
   const [searchParams] = useSearchParams()
   const decodedName = companyName ? decodeURIComponent(companyName) : ''
@@ -64,11 +66,11 @@ export const CompanyDetailPage = ({ jobs, employers, companyAliases = [], isLoad
 
   const company: CompanyInfo | undefined = useMemo(() => {
     if (!decodedName) return undefined
-    const companies = buildCompanies(jobs, employers, companyAliases)
+    const companies = buildCompanies(jobs, employers, companyAliases, companyIdentities)
     return canonicalId
       ? companies.find(c => c.canonicalId === canonicalId)
       : companies.find(c => c.name === decodedName)
-  }, [jobs, employers, companyAliases, decodedName, canonicalId])
+  }, [jobs, employers, companyAliases, companyIdentities, decodedName, canonicalId])
 
   const companyJobs = useMemo(() => {
     if (!company) return []

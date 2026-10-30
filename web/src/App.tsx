@@ -6,7 +6,9 @@ import { HomePage } from './pages/HomePage'
 import { fetchJobs, type FetchJobsResult } from './services/jobsService'
 import { fetchEmployers } from './services/employersService'
 import { fetchCompanyAliases } from './services/companyAliasesService'
+import { fetchCompanyIdentities } from './services/companyIdentitiesService'
 import type { CompanyAlias } from './types/companyAlias'
+import type { CompanyIdentity } from './types/companyIdentity'
 import type { EmployerRecord } from './types/employer'
 import type { Job, JobFilters } from './types/job'
 import type { JobsMetadata } from './types/metadata'
@@ -77,6 +79,7 @@ function AppContent() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [employers, setEmployers] = useState<EmployerRecord[]>([])
   const [companyAliases, setCompanyAliases] = useState<CompanyAlias[]>([])
+  const [companyIdentities, setCompanyIdentities] = useState<CompanyIdentity[]>([])
   const [metadata, setMetadata] = useState<JobsMetadata | null>(null)
   const [filters, setFilters] = useState<JobFilters>({ ...defaultFilters })
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -88,14 +91,15 @@ function AppContent() {
       setIsLoading(true)
       setError(null)
       try {
-        const [result, employerRecords, aliases]: [FetchJobsResult, EmployerRecord[], CompanyAlias[]] = await Promise.all([
-          fetchJobs(), fetchEmployers(), fetchCompanyAliases(),
+        const [result, employerRecords, aliases, identities]: [FetchJobsResult, EmployerRecord[], CompanyAlias[], CompanyIdentity[]] = await Promise.all([
+          fetchJobs(), fetchEmployers(), fetchCompanyAliases(), fetchCompanyIdentities(),
         ])
         if (!ignore) {
           setJobs(result.jobs)
           setMetadata(result.metadata)
           setEmployers(employerRecords)
           setCompanyAliases(aliases)
+          setCompanyIdentities(identities)
         }
       } catch (err) {
         if (!ignore) {
@@ -210,6 +214,7 @@ function AppContent() {
               jobs={jobs}
               employers={employers}
               companyAliases={companyAliases}
+              companyIdentities={companyIdentities}
               isLoading={isLoading}
               error={error}
               metadata={metadata}
@@ -225,6 +230,7 @@ function AppContent() {
               jobs={jobs}
               employers={employers}
               companyAliases={companyAliases}
+              companyIdentities={companyIdentities}
               isLoading={isLoading}
               error={error}
               metadata={metadata}

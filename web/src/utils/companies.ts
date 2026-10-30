@@ -1,6 +1,7 @@
 import type { Job } from '../types/job'
 import type { EmployerRecord } from '../types/employer'
 import type { CompanyAlias } from '../types/companyAlias'
+import type { CompanyIdentity } from '../types/companyIdentity'
 import { normalizeCountry } from './jobFilters'
 
 export interface CompanyInfo {
@@ -44,40 +45,109 @@ export const defaultCompanyFilters: CompanyFilters = {
   jobType: 'All types',
 }
 
-export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = [], aliases: CompanyAlias[] = []): CompanyInfo[] => {
-  const aliasByName = new Map<string, CompanyAlias>()
+type IdentityEvidence = {
+  company_url?: string | null
+  linkedin_company_url?: string | null
+  lei?: string | null
+  commercial_registration_number?: string | null
+  registration_authority?: string | null
+  wikidata_id?: string | null
+}
+
+const linkedinCompanyKey = (value?: string | null): string | null => {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    if (url.hostname !== 'linkedin.com' && !url.hostname.endsWith('.linkedin.com')) return null
+    const match = url.pathname.match(/^\/company\/([^/]+)\/?$/i)
+    return match?.[1] ? `linkedin:${decodeURIComponent(match[1]).toLowerCase()}` : null
+  } catch {
+    return null
+  }
+}
+
+const leiKey = (value?: string | null): string | null =>
+  value && /^[a-z\d]{20}$/i.test(value.trim()) ? `lei:${value.trim().toUpperCase()}` : null
+
+const wikidataKey = (value?: string | null): string | null =>
+  value && /^q\d+$/i.test(value.trim()) ? `wikidata:${value.trim().toUpperCase()}` : null
+
+const registrationKey = (evidence: IdentityEvidence): string | null => {
+  const number = evidence.commercial_registration_number?.trim().toUpperCase()
+  const authority = evidence.registration_authority?.trim().toUpperCase()
+  return number && authority ? `registration:${authority}:${number}` : null
+}
+
+const evidenceKeys = (evidence: IdentityEvidence): string[] => [
+  linkedinCompanyKey(evidence.linkedin_company_url ?? evidence.company_url),
+  leiKey(evidence.lei),
+  registrationKey(evidence),
+  wikidataKey(evidence.wikidata_id),
+].filter((key): key is string => Boolean(key))
+
+export const buildCompanies = (
+  jobs: Job[],
+  employers: EmployerRecord[] = [],
+  aliases: CompanyAlias[] = [],
+  identities: CompanyIdentity[] = [],
+): CompanyInfo[] => {
+  const aliasIdsByName = new Map<string, Set<number>>()
   const aliasesByCanonicalId = new Map<number, Set<string>>()
-  const ambiguousAliases = new Set<string>()
+  const aliasLabelsById = new Map<number, string>()
   for (const alias of aliases) {
     const key = alias.raw_value.trim().toLowerCase()
     if (!key || !Number.isInteger(alias.canonical_id) || alias.canonical_id <= 0 || !alias.canonical_label.trim()) continue
-    const previous = aliasByName.get(key)
-    if (previous && (previous.canonical_id !== alias.canonical_id || previous.canonical_label !== alias.canonical_label)) {
-      aliasByName.delete(key)
-      ambiguousAliases.add(key)
-    } else if (!ambiguousAliases.has(key)) {
-      aliasByName.set(key, alias)
-    }
-  }
-  for (const alias of aliasByName.values()) {
+    const ids = aliasIdsByName.get(key) ?? new Set<number>()
+    ids.add(alias.canonical_id)
+    aliasIdsByName.set(key, ids)
+    aliasLabelsById.set(alias.canonical_id, alias.canonical_label)
     const names = aliasesByCanonicalId.get(alias.canonical_id) ?? new Set<string>()
     names.add(alias.raw_value)
     aliasesByCanonicalId.set(alias.canonical_id, names)
   }
-  const identity = (name: string) => {
+
+  const identityById = new Map(identities
+    .filter(identity => Number.isInteger(identity.canonical_id) && identity.canonical_id > 0 && identity.canonical_label.trim())
+    .map(identity => [identity.canonical_id, identity]))
+  const identityIdsByKey = new Map<string, Set<number>>()
+  for (const identity of identityById.values()) {
+    for (const key of evidenceKeys(identity)) {
+      const ids = identityIdsByKey.get(key) ?? new Set<number>()
+      ids.add(identity.canonical_id)
+      identityIdsByKey.set(key, ids)
+    }
+  }
+
+  const identity = (name: string, evidence: IdentityEvidence = {}, additionalIds: Iterable<number> = []) => {
     const normalized = name.trim().toLowerCase()
     if (!normalized) return { key: '', canonicalId: undefined, name }
-    const alias = aliasByName.get(normalized)
-    return alias
-      ? { key: `refdata:${alias.canonical_id}`, canonicalId: alias.canonical_id, name: alias.canonical_label }
+    const ids = new Set([...(aliasIdsByName.get(normalized) ?? []), ...additionalIds])
+    for (const key of evidenceKeys(evidence)) {
+      for (const id of identityIdsByKey.get(key) ?? []) ids.add(id)
+    }
+    if (ids.size !== 1) return { key: `name:${normalized}`, canonicalId: undefined, name }
+    const canonicalId = ids.values().next().value as number
+    const canonicalLabel = identityById.get(canonicalId)?.canonical_label ?? aliasLabelsById.get(canonicalId)
+    return canonicalLabel
+      ? { key: `refdata:${canonicalId}`, canonicalId, name: canonicalLabel }
       : { key: `name:${normalized}`, canonicalId: undefined, name }
   }
 
   const employerByName = new Map<string, EmployerRecord>()
   const employerNamesByKey = new Map<string, Set<string>>()
+  const employerCanonicalIdsByName = new Map<string, Set<number>>()
+  const unresolvedEmployerNames = new Set<string>()
   for (const employer of [...employers].sort((a, b) => (b.jobs_seen ?? 0) - (a.jobs_seen ?? 0))) {
-    const key = identity(employer.company_name).key
+    const resolved = identity(employer.company_name, employer)
+    const key = resolved.key
     if (!key) continue
+    if (resolved.canonicalId) {
+      const ids = employerCanonicalIdsByName.get(employer.company_name.trim().toLowerCase()) ?? new Set<number>()
+      ids.add(resolved.canonicalId)
+      employerCanonicalIdsByName.set(employer.company_name.trim().toLowerCase(), ids)
+    } else {
+      unresolvedEmployerNames.add(employer.company_name.trim().toLowerCase())
+    }
     const names = employerNamesByKey.get(key) ?? new Set<string>()
     names.add(employer.company_name)
     employerNamesByKey.set(key, names)
@@ -119,7 +189,11 @@ export const buildCompanies = (jobs: Job[], employers: EmployerRecord[] = [], al
     const companyName = job.company.trim()
     if (!companyName) continue
 
-    const resolved = identity(companyName)
+    const employerName = companyName.toLowerCase()
+    const employerIds = unresolvedEmployerNames.has(employerName)
+      ? []
+      : employerCanonicalIdsByName.get(employerName) ?? []
+    const resolved = identity(companyName, { company_url: job.companyUrl }, employerIds)
     let entry = companyMap.get(resolved.key)
     if (!entry) {
       entry = {

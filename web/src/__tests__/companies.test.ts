@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { EmployerRecord } from '../types/employer'
+import type { CompanyIdentity } from '../types/companyIdentity'
 import type { Job } from '../types/job'
 import { buildCompanies } from '../utils/companies'
 
@@ -55,5 +56,51 @@ describe('buildCompanies employer records', () => {
       jobCount: 0,
       employer: { lei: 'LEI-2' },
     })
+  })
+
+  it('matches an exact LinkedIn company page across localized LinkedIn hosts', () => {
+    const identities: CompanyIdentity[] = [{
+      canonical_id: 7,
+      canonical_label: 'Acme Group',
+      linkedin_company_url: 'https://www.linkedin.com/company/acme-group/',
+    }]
+    const companies = buildCompanies([{
+      ...job,
+      company: 'Acme Saudi',
+      companyUrl: 'https://sa.linkedin.com/company/acme-group?trk=company',
+    }], [], [], identities)
+
+    expect(companies).toHaveLength(1)
+    expect(companies[0]).toMatchObject({ name: 'Acme Group', canonicalId: 7, jobCount: 1 })
+  })
+
+  it('uses exact legal identifiers but rejects conflicting or parent identifiers', () => {
+    const identities: CompanyIdentity[] = [
+      { canonical_id: 7, canonical_label: 'Acme Group', lei: '5493001KJTIIGC8Y1R12' },
+      { canonical_id: 8, canonical_label: 'Other Group', wikidata_id: 'Q1234' },
+    ]
+    const companies = buildCompanies([
+      { ...job, company: 'Acme' },
+      { ...job, id: '2', company: 'Conflicting Employer' },
+      { ...job, id: '3', company: 'Subsidiary' },
+    ], [
+      { company_name: 'Acme', lei: '5493001KJTIIGC8Y1R12' },
+      { company_name: 'Conflicting Employer', lei: '5493001KJTIIGC8Y1R12', wikidata_id: 'Q1234' },
+      { company_name: 'Subsidiary', parent_lei: '5493001KJTIIGC8Y1R12' },
+    ], [], identities)
+
+    expect(companies.find(company => company.name === 'Acme Group')?.jobCount).toBe(1)
+    expect(companies.find(company => company.name === 'Conflicting Employer')?.canonicalId).toBeUndefined()
+    expect(companies.find(company => company.name === 'Subsidiary')?.canonicalId).toBeUndefined()
+  })
+
+  it('does not merge when an identity identifier points to multiple canonical companies', () => {
+    const companies = buildCompanies([job], [], [], [
+      { canonical_id: 7, canonical_label: 'Acme Group', lei: '5493001KJTIIGC8Y1R12' },
+      { canonical_id: 8, canonical_label: 'Other Group', lei: '5493001KJTIIGC8Y1R12' },
+    ])
+
+    expect(companies).toHaveLength(1)
+    expect(companies[0].canonicalId).toBeUndefined()
   })
 })

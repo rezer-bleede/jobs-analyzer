@@ -7,6 +7,7 @@ import { useJobView } from '../hooks/useJobView'
 import type { Job } from '../types/job'
 import type { EmployerRecord } from '../types/employer'
 import type { CompanyAlias } from '../types/companyAlias'
+import type { CompanyIdentity } from '../types/companyIdentity'
 import type { JobsMetadata } from '../types/metadata'
 import { buildCompanies, filterCompanies, deriveFilterOptions, type CompanyInfo, type CompanyFilters, defaultCompanyFilters } from '../utils/companies'
 
@@ -14,6 +15,7 @@ interface CompaniesPageProps {
   jobs: Job[]
   employers: EmployerRecord[]
   companyAliases?: CompanyAlias[]
+  companyIdentities?: CompanyIdentity[]
   isLoading: boolean
   error: string | null
   metadata: JobsMetadata | null
@@ -178,11 +180,11 @@ const CompanyListRow = memo(({ company }: { company: CompanyInfo }) => (
 
 CompanyListRow.displayName = 'CompanyListRow'
 
-export const CompaniesPage = ({ jobs, employers, companyAliases = [], isLoading, error, metadata }: CompaniesPageProps) => {
+export const CompaniesPage = ({ jobs, employers, companyAliases = [], companyIdentities = [], isLoading, error, metadata }: CompaniesPageProps) => {
   const [filters, setFilters] = useState<CompanyFilters>({ ...defaultCompanyFilters })
   const [view, setView] = useJobView()
 
-  const companies = useMemo(() => buildCompanies(jobs, employers, companyAliases), [jobs, employers, companyAliases])
+  const companies = useMemo(() => buildCompanies(jobs, employers, companyAliases, companyIdentities), [jobs, employers, companyAliases, companyIdentities])
   const filterOptions = useMemo(() => deriveFilterOptions(companies), [companies])
   const filteredCompanies = useMemo(() => filterCompanies(companies, filters), [companies, filters])
 
