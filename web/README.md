@@ -48,14 +48,19 @@ needed.
 | Variable             | Description                                                                                 |
 | -------------------- | ------------------------------------------------------------------------------------------- |
 | `VITE_JOBS_DATA_URL` | Absolute URL of the JSON payload in Cloudflare R2 that contains the job listings to render. |
-| `REFDATAHUB_API_URL` | RefDataHub API origin used by Pages Functions to fetch approved aliases and curated company identifiers. |
 
 > **CORS reminder:** Cloudflare R2 must return an `Access-Control-Allow-Origin` header that covers your deployment
 > (e.g. `*` or `https://<project>.pages.dev`). Without it the browser will surface a CORS error and the app will display a
 > guidance message while using `/jobs.json` as a safe fallback.
 
-When deploying on Cloudflare Pages, configure the variable in **Settings → Environment variables**. The URL provided by
-the user for this exercise is `https://6d9a56e137a3328cc52e48656dd30d91.r2.cloudflarestorage.com/me-data-jobs`.
+When deploying on Cloudflare Pages, configure `VITE_JOBS_DATA_URL` in **Settings → Environment variables**. The URL
+provided for the live R2 feed is `https://6d9a56e137a3328cc52e48656dd30d91.r2.cloudflarestorage.com/me-data-jobs`.
+
+### Publish RefDataHub feeds
+
+RefDataHub remains local and generic. From this directory, with its Docker API running on port 8000 and Wrangler
+authenticated, run `./scripts/publish-refdata.sh` after approving a review batch. It publishes the two documented
+reference feeds to `me-data-jobs`; empty alias arrays are valid, but an empty identities feed is rejected.
 
 ## Testing strategy
 
@@ -81,8 +86,8 @@ npm test
 1. Connect the repository to a new Cloudflare Pages project.
 2. Set the build command to `npm run build` and the output directory to `dist`.
 3. Add `VITE_JOBS_DATA_URL` and point it at your R2 object.
-4. Add `REFDATAHUB_API_URL` as a Pages runtime variable pointing to the deployed RefDataHub API. Curate company identity attributes there; exact unique LinkedIn, LEI, registration-number-plus-authority, and Wikidata matches take precedence. Name-only aliases still require reviewer approval, and identifier conflicts remain separate.
-5. Trigger a deployment – the site fetches live jobs, approved aliases, and curated company identities through Pages Functions.
+4. Publish approved RefDataHub data with `./scripts/publish-refdata.sh`.
+5. Trigger a deployment – the site fetches jobs and the published reference feeds through Pages Functions.
 
 ## License
 
