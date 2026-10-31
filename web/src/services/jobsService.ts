@@ -214,27 +214,13 @@ export interface FetchJobsResult {
 }
 
 const CACHE_KEY = 'jobs_analyzer_cache'
-const CACHE_TIMESTAMP_KEY = 'jobs_analyzer_cache_timestamp'
-const CACHE_TTL_MS = 30 * 60 * 1000
 
-interface CachedData {
-  payload: unknown
-  timestamp: number
-}
-
-const getCachedData = (): CachedData | null => {
+const getCachedData = (): unknown | null => {
   try {
     const cached = localStorage.getItem(CACHE_KEY)
-    const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY)
-    if (cached && timestamp) {
-      return {
-        payload: JSON.parse(cached),
-        timestamp: parseInt(timestamp, 10),
-      }
-    }
+    return cached ? JSON.parse(cached) : null
   } catch {
     localStorage.removeItem(CACHE_KEY)
-    localStorage.removeItem(CACHE_TIMESTAMP_KEY)
   }
   return null
 }
@@ -244,7 +230,6 @@ const setCachedData = (payload: unknown): void => {
   const persist = () => {
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(compacted))
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString())
     } catch {
       // Storage full or unavailable, skip caching
     }
@@ -257,22 +242,11 @@ const setCachedData = (payload: unknown): void => {
   }
 }
 
-const isCacheValid = (timestamp: number): boolean => {
-  return Date.now() - timestamp < CACHE_TTL_MS
-}
-
 export const fetchJobs = async (
   dataUrl = import.meta.env.VITE_JOBS_DATA_URL || `${import.meta.env.BASE_URL}api/jobs`,
   fallbackUrl = `${import.meta.env.BASE_URL}jobs.json`,
 ): Promise<FetchJobsResult> => {
   const cached = getCachedData()
-  if (cached && isCacheValid(cached.timestamp)) {
-    return {
-      jobs: normaliseJobs(cached.payload),
-      metadata: extractMetadata(cached.payload),
-    }
-  }
-
   const errors: string[] = []
   const trimmedPrimaryUrl = dataUrl?.trim()
 
@@ -309,8 +283,8 @@ export const fetchJobs = async (
 
   if (cached) {
     return {
-      jobs: normaliseJobs(cached.payload),
-      metadata: extractMetadata(cached.payload),
+      jobs: normaliseJobs(cached),
+      metadata: extractMetadata(cached),
     }
   }
 

@@ -156,6 +156,27 @@ describe('fetchJobs', () => {
     })
   })
 
+  it('refreshes the network even when local cache is recent', async () => {
+    localStorage.setItem('jobs_analyzer_cache', JSON.stringify({
+      metadata: { lastUpdated: '2026-10-27T01:59:18Z', totalJobs: 133 },
+      jobs: [{ job_hash: 'old-job', title: 'Old role' }],
+    }))
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        metadata: { lastUpdated: '2026-10-31T13:01:08Z', totalJobs: 791 },
+        jobs: [{ job_hash: 'new-job', title: 'Fresh role' }],
+      }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const result = await fetchJobs('https://example.com/jobs.json')
+
+    expect(fetchMock).toHaveBeenCalledWith('https://example.com/jobs.json')
+    expect(result.jobs.map((job) => job.id)).toEqual(['new-job'])
+    expect(result.metadata?.totalJobs).toBe(791)
+  })
+
   it('falls back to the default jobs file when the primary URL fails (e.g. due to CORS)', async () => {
     const fallbackPayload = [
       {
