@@ -17,7 +17,7 @@ type RawJob = Record<string, unknown>
 const CACHE_FIELDS = [
   'job_hash', 'id', 'title', 'job_title_inferred', 'company', 'company_name_inferred', 'location',
   'country', 'country_inferred', 'state_inferred', 'city_inferred', 'job_type', 'job_type_inferred', 'date_posted',
-  'min_amount', 'max_amount', 'currency', 'is_remote', 'site', 'job_url', 'job_url_direct',
+  'min_amount', 'max_amount', 'currency', 'salary', 'salary_inferred', 'is_remote', 'site', 'job_url', 'job_url_direct',
   'company_url', 'company_website_inferred', 'company_description', 'company_description_inferred', 'description', 'job_description',
   'desired_tech_skills_inferred', 'tech_skills', 'desired_soft_skills_inferred', 'soft_skills',
   'desired_domain_skills_inferred', 'domain_skills', 'company_industry', 'company_industry_inferred',
@@ -137,6 +137,7 @@ const normaliseJob = (raw: RawJob): Job => {
     minSalary,
     maxSalary,
     currency,
+    salary: stringOrNull(raw.salary_inferred) ?? stringOrNull(raw.salary),
     isRemote,
     techSkills,
     softSkills,

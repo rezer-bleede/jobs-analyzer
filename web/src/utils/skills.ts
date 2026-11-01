@@ -1,13 +1,14 @@
 import type { Job } from '../types/job'
 
 const SKILL_DELIMITERS = /,|\n|\||;|\//
+const ACRONYMS = new Set(['AI', 'API', 'AWS', 'BI', 'BW', 'ETL', 'ERP', 'GIS', 'LLM', 'ML', 'NLP', 'SAP', 'SQL'])
 
 const titleCase = (skill: string): string => {
   if (skill.toUpperCase() === skill) {
     return skill
       .toLowerCase()
       .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => ACRONYMS.has(word.toUpperCase()) ? word.toUpperCase() : word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
   }
   return skill

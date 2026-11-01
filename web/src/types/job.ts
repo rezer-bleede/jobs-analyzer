@@ -15,6 +15,7 @@ export interface Job {
   minSalary?: number | null
   maxSalary?: number | null
   currency?: string | null
+  salary?: string | null
   isRemote: boolean | null
   techSkills: string[]
   softSkills: string[]
