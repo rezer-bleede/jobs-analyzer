@@ -197,6 +197,8 @@ export const DATE_POSTED_OPTIONS = [
   'Past 2 weeks',
 ] as const
 
+export const ALL_SOURCES = 'All sources'
+
 const dateWindowInDays: Record<string, number> = {
   'Past 24 hours': 1,
   'Past 3 days': 3,
@@ -209,6 +211,7 @@ export const defaultFilters: JobFilters = {
   location: 'All locations',
   datePosted: DATE_POSTED_OPTIONS[0],
   countries: [],
+  source: ALL_SOURCES,
 }
 
 export const buildJobSearchIndex = (jobs: Job[]): WeakMap<Job, string> => {
@@ -287,13 +290,19 @@ const matchesDatePosted = (job: Job, dateFilter: string): boolean => {
   return postingDate >= windowStart
 }
 
+const matchesSource = (job: Job, source: string): boolean => {
+  if (!source || source === ALL_SOURCES) return true
+  return job.source?.trim().toLowerCase() === source.toLowerCase()
+}
+
 export const applyFilters = (jobs: Job[], filters: JobFilters, searchIndex?: WeakMap<Job, string>): Job[] => {
   return jobs.filter(
     (job) =>
       matchesSearch(job, filters.searchTerms, searchIndex) &&
       matchesLocation(job, filters.location) &&
       matchesCountries(job, filters.countries) &&
-      matchesDatePosted(job, filters.datePosted),
+      matchesDatePosted(job, filters.datePosted) &&
+      matchesSource(job, filters.source),
   )
 }
 
@@ -326,6 +335,15 @@ export const deriveCountryOptions = (jobs: Job[]): string[] => {
 
   const sortedCountries = Array.from(foundCountries).sort((a, b) => a.localeCompare(b))
   return sortedCountries.length > 0 ? sortedCountries : [...STANDARDIZED_COUNTRIES]
+}
+
+export const deriveSourceOptions = (jobs: Job[]): string[] => {
+  const sources = new Map<string, string>()
+  jobs.forEach(({ source }) => {
+    const value = source?.trim()
+    if (value && !sources.has(value.toLowerCase())) sources.set(value.toLowerCase(), value)
+  })
+  return [ALL_SOURCES, ...Array.from(sources.values()).sort((a, b) => a.localeCompare(b))]
 }
 
 export const deriveSearchOptions = (jobs: Job[]): string[] => {

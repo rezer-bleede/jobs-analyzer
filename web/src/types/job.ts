@@ -34,4 +34,5 @@ export interface JobFilters {
   location: string
   datePosted: string
   countries: string[]
+  source: string
 }

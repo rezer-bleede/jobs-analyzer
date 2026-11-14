@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Job, JobFilters } from '../types/job'
-import { applyFilters, defaultFilters } from '../utils/jobFilters'
+import { ALL_SOURCES, applyFilters, defaultFilters, deriveSourceOptions } from '../utils/jobFilters'
 
 const createJob = (overrides: Partial<Job> = {}): Job => ({
   id: '1',
@@ -61,6 +61,27 @@ describe('applyFilters', () => {
     const result = applyFilters(jobs, withFilters({ location: 'Saudi Arabia' }))
     expect(result).toHaveLength(1)
     expect(result[0].country).toBe('Saudi Arabia')
+  })
+
+  it('filters by source without case sensitivity', () => {
+    const jobs = [
+      createJob({ id: '1', source: 'LinkedIn' }),
+      createJob({ id: '2', source: 'Greenhouse' }),
+      createJob({ id: '3', source: null }),
+    ]
+
+    expect(applyFilters(jobs, withFilters({ source: 'greenhouse' })).map((job) => job.id)).toEqual(['2'])
+  })
+
+  it('derives sorted, case-insensitively unique source options', () => {
+    const jobs = [
+      createJob({ source: 'Greenhouse' }),
+      createJob({ source: 'linkedin' }),
+      createJob({ source: 'greenhouse' }),
+      createJob({ source: null }),
+    ]
+
+    expect(deriveSourceOptions(jobs)).toEqual([ALL_SOURCES, 'Greenhouse', 'linkedin'])
   })
 
   it('filters by posting date window', () => {

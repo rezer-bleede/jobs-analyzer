@@ -21,6 +21,7 @@ interface HomePageProps {
   locationOptions: string[]
   countryOptions: string[]
   searchOptions: string[]
+  sourceOptions: string[]
   datePostedOptions: readonly string[]
   skillFrequency: SkillFrequency[]
   metrics: {
@@ -43,6 +44,7 @@ export const HomePage = ({
   locationOptions,
   countryOptions,
   searchOptions,
+  sourceOptions,
   datePostedOptions,
   skillFrequency,
   metrics,
@@ -116,6 +118,7 @@ export const HomePage = ({
         locationOptions={locationOptions}
         countryOptions={countryOptions}
         searchOptions={searchOptions}
+        sourceOptions={sourceOptions}
         datePostedOptions={datePostedOptions}
         isLoading={isLoading}
         onChange={onFiltersChange}

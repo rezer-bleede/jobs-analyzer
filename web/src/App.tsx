@@ -19,6 +19,7 @@ import {
   defaultFilters,
   deriveLocationOptions,
   deriveCountryOptions,
+  deriveSourceOptions,
   deriveSearchOptions,
   normalizeCountry,
 } from './utils/jobFilters'
@@ -124,6 +125,7 @@ function AppContent() {
   const filteredJobs = useMemo(() => applyFilters(jobs, filters, searchIndex), [jobs, filters, searchIndex])
   const locationOptions = useMemo(() => deriveLocationOptions(jobs), [jobs])
   const countryOptions = useMemo(() => deriveCountryOptions(jobs), [jobs])
+  const sourceOptions = useMemo(() => deriveSourceOptions(jobs), [jobs])
   const searchOptions = useMemo(() => deriveSearchOptions(jobs), [jobs])
   const filteredSkillFrequency = useMemo(() => buildSkillFrequency(filteredJobs), [filteredJobs])
   const filteredMetrics = useMemo(
@@ -195,6 +197,7 @@ function AppContent() {
               locationOptions={locationOptions}
               countryOptions={countryOptions}
               searchOptions={searchOptions}
+              sourceOptions={sourceOptions}
               datePostedOptions={DATE_POSTED_OPTIONS}
               skillFrequency={filteredSkillFrequency}
               metrics={filteredMetrics}

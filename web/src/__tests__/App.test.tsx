@@ -20,7 +20,7 @@ const mockJobsPayload = [
   },
   {
     job_hash: 167188750,
-    site: 'LinkedIn',
+    site: 'Lever',
     title: 'Data Platform Engineer',
     company: 'CloudScale',
     location: 'Dubai, United Arab Emirates',
@@ -139,5 +139,23 @@ describe('App', () => {
     expect(await screen.findByText(/showing 1 role/i)).toBeInTheDocument()
     expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument()
     expect(screen.queryByText('Data Platform Engineer')).not.toBeInTheDocument()
+  })
+
+  it('filters by job source and resets the source filter', async () => {
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
+    await waitFor(() => expect(screen.getByText('Senior Data Engineer')).toBeInTheDocument())
+
+    await userEvent.selectOptions(screen.getByLabelText(/job source/i), 'Lever')
+
+    expect(await screen.findByText(/showing 1 role/i)).toBeInTheDocument()
+    expect(screen.getByText('Data Platform Engineer')).toBeInTheDocument()
+    expect(screen.queryByText('Senior Data Engineer')).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /reset filters/i }))
+    expect(await screen.findByText(/showing 2 roles/i)).toBeInTheDocument()
   })
 })

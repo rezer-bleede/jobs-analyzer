@@ -8,6 +8,7 @@ interface FilterBarProps {
   locationOptions: string[]
   countryOptions: string[]
   searchOptions: string[]
+  sourceOptions: string[]
   datePostedOptions: readonly string[]
   isLoading: boolean
   onChange: (updates: Partial<JobFilters>) => void
@@ -19,6 +20,7 @@ export const FilterBar = ({
   locationOptions,
   countryOptions,
   searchOptions,
+  sourceOptions,
   datePostedOptions,
   isLoading,
   onChange,
@@ -27,7 +29,7 @@ export const FilterBar = ({
   return (
     <section className="section-card filter-bar-sticky mb-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2">
-        <div className="sm:col-span-2 lg:col-span-4">
+        <div className="sm:col-span-2 lg:col-span-3">
           <SearchMultiSelect
             label="Search roles or companies"
             placeholder="Search by title, company, technology, or keywords"
@@ -62,7 +64,19 @@ export const FilterBar = ({
             {datePostedOptions.map((option) => <option key={option} value={option}>{option}</option>)}
           </select>
         </div>
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-2">
+          <label htmlFor="source-filter" className="sr-only">Job source</label>
+          <select
+            id="source-filter"
+            className="input-modern min-h-[44px]"
+            value={filters.source}
+            onChange={(e) => onChange({ source: e.target.value })}
+            disabled={isLoading}
+          >
+            {sourceOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        </div>
+        <div className="lg:col-span-2">
           {countryOptions.length > 0 && (
             <CountryMultiSelect
               label="Countries"
