@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Applicant Autofill</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <h1>Applicant profile</h1>
+      <p class="privacy">Saved only in this browser. Submission is a separate, per-application action.</p>
+      <form id="profile-form">
+        <div class="fields">
+          <label>First name<input name="firstName" autocomplete="given-name"></label>
+          <label>Last name<input name="lastName" autocomplete="family-name"></label>
+        </div>
+        <label>Email<input name="email" type="email" autocomplete="email"></label>
+        <label>Phone<input name="phone" type="tel" autocomplete="tel"></label>
+        <label>LinkedIn profile<input name="linkedin" type="url" autocomplete="url"></label>
+        <label>GitHub profile<input name="github" type="url"></label>
+        <label>Website / portfolio<input name="website" type="url"></label>
+        <label>Location<input name="location" autocomplete="address-level2"></label>
+        <label class="file-label">Import profile JSON<input id="profile-import" type="file" accept="application/json,.json"></label>
+        <label class="file-label">Resume PDF<input id="resume" type="file" accept="application/pdf,.pdf"></label>
+        <p id="resume-name" class="hint">No resume saved</p>
+        <label class="check"><input id="overwrite" type="checkbox"> Replace fields that already have values</label>
+        <button id="fill" class="primary" type="button">Save and fill application</button>
+        <button id="submit" class="danger" type="button">Fill &amp; submit application</button>
+        <section id="submit-confirmation" class="confirmation" hidden aria-labelledby="confirm-title">
+          <h2 id="confirm-title">Confirm application submission</h2>
+          <p id="submit-target"></p>
+          <p class="hint">This sends your profile and resume without a final review. Native required-field errors and detected CAPTCHAs stop it; the employer can still reject incomplete answers.</p>
+          <button id="confirm-submit" class="danger" type="button">Confirm &amp; submit now</button>
+          <button id="cancel-submit" type="button">Cancel</button>
+        </section>
+        <button id="save" type="button">Save profile</button>
+        <button id="clear" class="plain" type="button">Clear saved profile and resume</button>
+        <p id="status" role="status" aria-live="polite"></p>
+      </form>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

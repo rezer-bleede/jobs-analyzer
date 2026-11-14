@@ -7,6 +7,15 @@ import { parseSkillList } from '../utils/skills'
 
 interface Props { jobs: Job[]; isLoading: boolean; error: string | null; metadata: JobsMetadata | null }
 
+const supportsAutofill = (url?: string | null) => {
+  try {
+    return ['boards.greenhouse.io', 'job-boards.greenhouse.io', 'boards.eu.greenhouse.io', 'job-boards.eu.greenhouse.io']
+      .includes(new URL(url ?? '').hostname)
+  } catch {
+    return false
+  }
+}
+
 const dateLabel = (date?: string | null) => {
   if (!date || Number.isNaN(new Date(date).getTime())) return 'Date not provided'
   return new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
@@ -68,6 +77,7 @@ export const JobDetailPage = ({ jobs, isLoading, error, metadata }: Props) => {
         <aside className="section-card h-fit lg:sticky lg:top-24">
           <p className="text-sm text-slate-500 dark:text-slate-400">Interested in this role?</p>
           {job.jobUrl ? <a className="btn-primary mt-4 inline-flex w-full items-center justify-center gap-2" href={job.jobUrl} target="_blank" rel="noreferrer">Apply on company site <ExternalLink size={16} /></a> : <p className="mt-4 text-sm text-slate-500">Application link unavailable.</p>}
+          {supportsAutofill(job.jobUrl) && <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Greenhouse is supported by the optional browser extension for autofill and confirmed submission.</p>}
           <div className="mt-5 border-t border-slate-200 pt-4 dark:border-slate-700"><DataFreshness metadata={metadata} isLoading={false} /></div>
         </aside>
       </article>

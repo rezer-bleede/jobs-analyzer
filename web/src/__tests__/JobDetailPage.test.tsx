@@ -20,7 +20,7 @@ describe('JobDetailPage', () => {
       desired_tech_skills_inferred: 'AI, SAP BW',
       desired_soft_skills_inferred: 'Leadership',
       domains_inferred: 'Analytics, Data',
-      job_url: 'https://example.com/job',
+      job_url: 'https://boards.greenhouse.io/acme/jobs/123',
     }])
 
     render(
@@ -41,6 +41,7 @@ describe('JobDetailPage', () => {
     expect(screen.getByText('Workplace not specified')).toBeInTheDocument()
     expect(screen.queryByText('Hybrid')).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /company profile/i })).toHaveAttribute('href', 'https://example.com/company')
+    expect(screen.getByText(/greenhouse is supported by the optional browser extension/i)).toBeInTheDocument()
     expect(screen.getByText('No description or requirements were captured from the job listing.')).toBeInTheDocument()
   })
 })

@@ -17,6 +17,8 @@ across the Middle East by reading a JSON feed stored in Cloudflare R2.
   Library.
 - 🛡️ **Resilient data ingest** – Normalises Cloudflare R2 payloads and defends against network failures with tested
   fallbacks.
+- 🧩 **Greenhouse autofill** – Optional Chrome/Edge extension fills common application fields locally, with per-application
+  confirmation before submission.
 
 ## Getting started locally
 
@@ -33,6 +35,11 @@ fixture, keeping development friction-free.
 
 The development server runs on <http://localhost:5173>. Update the environment variable to point at your own R2 object as
 needed.
+
+## Greenhouse autofill
+
+See [the extension install guide](extension/README.md). The profile and optional PDF resume stay in the browser. Submission
+requires a separate confirmation for each application.
 
 ## Available scripts
 
