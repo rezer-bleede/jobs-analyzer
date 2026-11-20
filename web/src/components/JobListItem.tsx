@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowUpRight, Calendar, DollarSign, MapPin } from 'lucide-react'
 import type { Job } from '../types/job'
 import { formatJobDate, formatRemote, formatSalaryRange } from '../utils/jobFormat'
@@ -7,13 +7,20 @@ import { formatJobDate, formatRemote, formatSalaryRange } from '../utils/jobForm
 const MAX_SKILLS = 3
 
 export const JobListItem = memo(({ job }: { job: Job }) => {
+  const navigate = useNavigate()
   const salaryLabel = formatSalaryRange(job)
   const skills = job.techSkills.slice(0, MAX_SKILLS)
   const extraSkills = job.techSkills.length - skills.length
   const detailsHref = `/jobs/${encodeURIComponent(job.id)}`
 
   return (
-    <article className="job-row">
+    <article
+      className="job-row cursor-pointer"
+      onClick={(event) => {
+        if (event.target instanceof Element && event.target.closest('a, button')) return
+        navigate(detailsHref)
+      }}
+    >
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
